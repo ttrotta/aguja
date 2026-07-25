@@ -166,3 +166,36 @@ will be silently truncated before embedding, meaning its tail contributes nothin
 This is precisely the class of invisible failure the tool exists to expose, so it must be surfaced
 as a first-class finding rather than hidden (FR-017). Choosing `bge-small` would have doubled that
 ceiling; if truncation warnings turn out to dominate real usage, that is the trade to revisit.
+
+---
+
+## D-007 — Pin the WASM execution backend, buying determinism with speed
+
+**Date**: 2026-07-25 · **Status**: Accepted
+
+**Context.** Transformers.js can execute on WebGPU where available and fall back to WASM
+otherwise. WebGPU is substantially faster. The default behavior is to pick by capability
+detection.
+
+**Decision.** Pin the WASM backend with a fixed thread count. WebGPU stays off in v1.
+
+**Why.** D-002 justified local inference partly on determinism: identical scores across runs are
+what let the retrieval logic be tested with plain assertions instead of tolerance ranges, and the
+constitution turned that into a hard rule. Capability detection quietly destroys it. The two
+backends round differently, so the same document and query would score differently on two
+machines — and worse, on the *same* machine after a browser update enabled WebGPU. A regression
+test written on Monday would fail on Friday for no reason the developer could see.
+
+The thread count matters for the same reason. Thread partitioning fixes the reduction order
+inside matrix multiplication, so deriving it from `navigator.hardwareConcurrency` would
+reintroduce exactly the device dependence this decision removes.
+
+The speed is affordable. Quantized MiniLM over short chunks runs in the low tens of milliseconds
+per chunk on WASM, putting a 100-chunk document comfortably inside the 15-second budget the
+specification sets. WebGPU would be faster than a requirement that is already met.
+
+**Consequences.** Determinism holds for a given browser and build, not across browsers — the
+specification should not be read as promising more. Very large documents will feel slower than
+they need to. If the 15-second budget is missed on real hardware, this is the decision to
+revisit, and revisiting it costs the cross-run guarantee, so the trade must be measured rather
+than assumed.
