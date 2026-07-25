@@ -27,12 +27,12 @@ before the next begins.
 
 **Purpose**: A running project with nothing feature-specific in it yet.
 
-- [ ] T001 Initialize the Next.js 16 project (App Router, TypeScript, Tailwind CSS 4) — `package.json`, `tsconfig.json`, `tailwind.config.ts`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css`
-- [ ] T002 [P] Add `@huggingface/transformers` v4 as a dependency (research.md R-001)
-- [ ] T003 [P] Configure Vitest with two projects — domain tests in `environment: 'node'`, component tests in jsdom — `vitest.config.ts` (research.md R-007)
-- [ ] T004 [P] Configure ESLint `no-restricted-imports` banning `react`, `next/*`, `@huggingface/transformers`, and relative escapes out of any `**/domain/**` folder — `eslint.config.js` (research.md R-007)
-- [ ] T005 [P] Configure Playwright for Chromium — `playwright.config.ts`
-- [ ] T006 [P] Add `dev`, `build`, `start`, `test`, `test:domain`, `test:watch`, `test:e2e`, `lint`, `typecheck` scripts to `package.json` per quickstart.md
+- [X] T001 Initialize the Next.js 16 project (App Router, TypeScript, Tailwind CSS 4) — `package.json`, `tsconfig.json`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css` (no `tailwind.config.ts`: Tailwind v4 configures via `@import "tailwindcss"` in globals.css plus `@tailwindcss/postcss`, not a JS config file)
+- [X] T002 [P] Add `@huggingface/transformers` v4 as a dependency (research.md R-001)
+- [X] T003 [P] Configure Vitest with two projects — domain tests in `environment: 'node'`, component tests in jsdom — `vitest.config.ts` (research.md R-007)
+- [X] T004 [P] Configure ESLint `no-restricted-imports` banning `react`, `next/*`, `@huggingface/transformers`, and cross-layer imports (`**/ui/**`, `**/app/**`, `**/embedding/**`) from any `**/domain/**` folder — `eslint.config.mjs` (research.md R-007)
+- [X] T005 [P] Configure Playwright for Chromium — `playwright.config.ts`
+- [X] T006 [P] Add `dev`, `build`, `start`, `test`, `test:domain`, `test:watch`, `test:e2e`, `lint`, `typecheck` scripts to `package.json` per quickstart.md
 
 **Checkpoint**: `pnpm test`, `pnpm lint`, `pnpm typecheck` all pass against an empty project.
 
