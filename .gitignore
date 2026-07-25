@@ -1,0 +1,29 @@
+# Local agent state — session-scoped, not project configuration
+.claude/settings.local.json
+.specify/feature.json
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Editor and OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
