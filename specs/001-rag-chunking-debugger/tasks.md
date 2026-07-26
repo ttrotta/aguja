@@ -66,24 +66,24 @@ required; verify with the network throttled offline after first paint.
 
 ### Tests for User Story 1 (write first, confirm failing)
 
-- [ ] T012 [P] [US1] Write failing property tests for chunk invariants — join reproduces the source exactly; `text === content.slice(start, end)`; empty document → `[]`; document shorter than one chunk → one chunk — in `src/features/chunking/domain/invariants.test.ts` (FR-010, SC-008)
-- [ ] T013 [P] [US1] Write failing tests for the fixed-size strategy in `src/features/chunking/domain/fixed-size.test.ts`
-- [ ] T014 [P] [US1] Write failing tests for the fixed-size-overlap strategy, including `overlap >= size` rejection, in `src/features/chunking/domain/fixed-size-overlap.test.ts`
-- [ ] T015 [P] [US1] Write failing tests for the paragraphs strategy — no blank line → one chunk plus a notice; consecutive blank lines collapse; chunks are never empty — in `src/features/chunking/domain/paragraphs.test.ts` (SC-010)
-- [ ] T016 [P] [US1] Write failing tests for `validateStrategy` — `size <= 0` and `overlap >= size` rejected, each naming the violated constraint — in `src/features/chunking/domain/strategy.test.ts` (FR-009)
-- [ ] T017 [P] [US1] Write failing tests for `toSegments` — tiles `[0, contentLength)` exactly with no gaps; multi-chunk regions carry every covering `chunkIndex` — in `src/features/chunking/domain/segments.test.ts` (FR-008)
+- [X] T012 [P] [US1] Write failing property tests for chunk invariants — join reproduces the source exactly; `text === content.slice(start, end)`; empty document → `[]`; document shorter than one chunk → one chunk — in `src/features/chunking/domain/invariants.test.ts` (FR-010, SC-008)
+- [X] T013 [P] [US1] Write failing tests for the fixed-size strategy in `src/features/chunking/domain/fixed-size.test.ts`
+- [X] T014 [P] [US1] Write failing tests for the fixed-size-overlap strategy, including `overlap >= size` rejection, in `src/features/chunking/domain/fixed-size-overlap.test.ts`
+- [X] T015 [P] [US1] Write failing tests for the paragraphs strategy — no blank line → one chunk plus a notice; consecutive blank lines collapse; chunks are never empty — in `src/features/chunking/domain/paragraphs.test.ts` (SC-010)
+- [X] T016 [P] [US1] Write failing tests for `validateStrategy` — `size <= 0` and `overlap >= size` rejected, each naming the violated constraint — in `src/features/chunking/domain/strategy.test.ts` (FR-009)
+- [X] T017 [P] [US1] Write failing tests for `toSegments` — tiles `[0, contentLength)` exactly with no gaps; multi-chunk regions carry every covering `chunkIndex` — in `src/features/chunking/domain/segments.test.ts` (FR-008)
 
 ### Implementation for User Story 1
 
-- [ ] T018 [US1] Implement the `ChunkingStrategy` union and `validateStrategy` in `src/features/chunking/domain/strategy.ts` (passes T016)
-- [ ] T019 [P] [US1] Implement `fixed-size.ts` (passes T013)
-- [ ] T020 [P] [US1] Implement `fixed-size-overlap.ts` (passes T014)
-- [ ] T021 [P] [US1] Implement `paragraphs.ts` (passes T015)
-- [ ] T022 [US1] Implement `toSegments` in `segments.ts` (passes T017)
-- [ ] T023 [US1] Implement the `chunk()` dispatcher in `src/features/chunking/domain/index.ts` per contracts/domain-api.md §2 (depends on T018–T021; passes T012)
-- [ ] T024 [US1] Implement `StrategyControls.tsx` — strategy picker, parameter inputs, inline validation messages from `validateStrategy` — `src/features/chunking/ui/StrategyControls.tsx`
-- [ ] T025 [US1] Implement `ChunkedDocument.tsx` — renders `Segment`s over the pasted text, overlap regions visually distinct, chunk index and length labeled, selection shows exact text/range/count — `src/features/chunking/ui/ChunkedDocument.tsx` (FR-006, FR-008)
-- [ ] T026 [US1] Wire chunking state into `src/app/page.tsx` — strategy or parameter change recomputes and redraws without re-pasting (FR-007)
+- [X] T018 [US1] Implement the `ChunkingStrategy` union and `validateStrategy` in `src/features/chunking/domain/strategy.ts` (passes T016)
+- [X] T019 [P] [US1] Implement `fixed-size.ts` (passes T013)
+- [X] T020 [P] [US1] Implement `fixed-size-overlap.ts` (passes T014)
+- [X] T021 [P] [US1] Implement `paragraphs.ts` (passes T015)
+- [X] T022 [US1] Implement `toSegments` in `segments.ts` (passes T017)
+- [X] T023 [US1] Implement the `chunk()` dispatcher in `src/features/chunking/domain/index.ts` per contracts/domain-api.md §2 (depends on T018–T021; passes T012)
+- [X] T024 [US1] Implement `StrategyControls.tsx` — strategy picker, parameter inputs, inline validation messages from `validateStrategy` — `src/features/chunking/ui/StrategyControls.tsx`
+- [X] T025 [US1] Implement `ChunkedDocument.tsx` — renders `Segment`s over the pasted text, overlap regions visually distinct, chunk index and length labeled, selection shows exact text/range/count — `src/features/chunking/ui/ChunkedDocument.tsx` (FR-006, FR-008)
+- [X] T026 [US1] Wire chunking state into `src/app/page.tsx` — strategy or parameter change recomputes and redraws without re-pasting (FR-007)
 
 ### Worker and tokenizer for User Story 1 (completes the fourth strategy — research.md R-004)
 
