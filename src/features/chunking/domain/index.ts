@@ -15,6 +15,8 @@ export type {
 } from "./strategy";
 export { validateStrategy } from "./strategy";
 export { toSegments } from "./segments";
+export { chunkByTokens } from "./tokens";
+export type { TokenSpan } from "./tokens";
 
 /** Strategies needing no tokenizer. Total over valid input. */
 export function chunk(content: string, strategy: NonTokenStrategy): Chunk[] {

@@ -1,31 +1,36 @@
 "use client";
 
 import type { ChangeEvent } from "react";
-import { validateStrategy, type NonTokenStrategy } from "../domain/strategy";
+import { validateStrategy, type ChunkingStrategy } from "../domain/strategy";
 
 type StrategyControlsProps = {
-  strategy: NonTokenStrategy;
-  onChange: (strategy: NonTokenStrategy) => void;
+  strategy: ChunkingStrategy;
+  onChange: (strategy: ChunkingStrategy) => void;
+  /** Gates the "tokens" option — never gated on the (much larger) model (FR-011). */
+  tokenizerReady: boolean;
 };
 
-const STRATEGY_LABELS: Record<NonTokenStrategy["type"], string> = {
+const STRATEGY_LABELS: Record<ChunkingStrategy["type"], string> = {
   "fixed-size": "Fixed size",
   "fixed-size-overlap": "Fixed size with overlap",
   paragraphs: "Paragraphs",
+  tokens: "By tokenization units",
 };
 
 const FIELD_CLASS =
   "rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900";
 
-export function StrategyControls({ strategy, onChange }: StrategyControlsProps) {
+export function StrategyControls({ strategy, onChange, tokenizerReady }: StrategyControlsProps) {
   const validation = validateStrategy(strategy);
 
   function handleTypeChange(event: ChangeEvent<HTMLSelectElement>) {
-    const type = event.target.value as NonTokenStrategy["type"];
+    const type = event.target.value as ChunkingStrategy["type"];
     if (type === "fixed-size") {
       onChange({ type, size: 500 });
     } else if (type === "fixed-size-overlap") {
       onChange({ type, size: 500, overlap: 100 });
+    } else if (type === "tokens") {
+      onChange({ type, size: 128 });
     } else {
       onChange({ type: "paragraphs" });
     }
@@ -37,8 +42,9 @@ export function StrategyControls({ strategy, onChange }: StrategyControlsProps) 
         <span className="text-zinc-600 dark:text-zinc-400">Strategy</span>
         <select value={strategy.type} onChange={handleTypeChange} className={FIELD_CLASS}>
           {Object.entries(STRATEGY_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
+            <option key={value} value={value} disabled={value === "tokens" && !tokenizerReady}>
               {label}
+              {value === "tokens" && !tokenizerReady ? " (loading tokenizer…)" : ""}
             </option>
           ))}
         </select>
@@ -91,6 +97,18 @@ export function StrategyControls({ strategy, onChange }: StrategyControlsProps) 
             />
           </label>
         </>
+      )}
+
+      {strategy.type === "tokens" && (
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-zinc-600 dark:text-zinc-400">Size (tokens)</span>
+          <input
+            type="number"
+            value={strategy.size}
+            onChange={(event) => onChange({ type: "tokens", size: Number(event.target.value) })}
+            className={FIELD_CLASS}
+          />
+        </label>
       )}
 
       {!validation.valid && (

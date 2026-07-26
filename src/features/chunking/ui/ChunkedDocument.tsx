@@ -7,9 +7,11 @@ import { toSegments } from "../domain/segments";
 type ChunkedDocumentProps = {
   content: string;
   chunks: Chunk[];
+  /** Surfaced above the boundaries, e.g. paragraphs finding no separator (SC-010). */
+  notice?: string | null;
 };
 
-export function ChunkedDocument({ content, chunks }: ChunkedDocumentProps) {
+export function ChunkedDocument({ content, chunks, notice }: ChunkedDocumentProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const segments = toSegments(chunks, content.length);
   const selectedChunk = selectedIndex === null ? null : (chunks[selectedIndex] ?? null);
@@ -18,6 +20,11 @@ export function ChunkedDocument({ content, chunks }: ChunkedDocumentProps) {
 
   return (
     <div className="flex flex-col gap-4">
+      {notice && (
+        <p className="rounded-md border border-amber-300 bg-amber-50 p-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+          {notice}
+        </p>
+      )}
       <pre className="whitespace-pre-wrap break-words rounded-md border border-zinc-300 bg-white p-4 font-mono text-sm leading-relaxed text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50">
         {segments.map((segment) => {
           const isOverlap = segment.chunkIndices.length > 1;
