@@ -45,11 +45,11 @@ demoed — pasting a document. Nothing here is a story on its own.
 
 **⚠️ CRITICAL**: No user story work starts before this phase is green.
 
-- [ ] T007 [P] Write failing tests for `validateDocument`, `isEmpty`, `MAX_DOCUMENT_LENGTH` in `src/features/documents/domain/document.test.ts` (spec.md FR-003)
-- [ ] T008 Implement `src/features/documents/domain/document.ts` to pass T007
-- [ ] T009 [P] Define the `Chunk` and `Segment` plain types (no logic — data-model.md) in `src/features/chunking/domain/chunk.ts`
-- [ ] T010 Wire the app shell — `src/app/layout.tsx`, `src/app/page.tsx` holding session-scoped state (document, strategy, query — D-005), `src/app/globals.css`
-- [ ] T011 Implement `DocumentInput.tsx` — paste target, live character counter against the cap, refusal at the cap, `beforeunload` warning — `src/features/documents/ui/DocumentInput.tsx` (FR-001, FR-003, FR-004)
+- [X] T007 [P] Write failing tests for `validateDocument`, `isEmpty`, `MAX_DOCUMENT_LENGTH` in `src/features/documents/domain/document.test.ts` (spec.md FR-003)
+- [X] T008 Implement `src/features/documents/domain/document.ts` to pass T007
+- [X] T009 [P] Define the `Chunk` and `Segment` plain types (no logic — data-model.md) in `src/features/chunking/domain/chunk.ts`
+- [X] T010 Wire the app shell — `src/app/layout.tsx`, `src/app/page.tsx` holding session-scoped state (document, strategy, query — D-005), `src/app/globals.css` (strategy/query state slots land in T026/T044 when their domain types exist; only document state is wired now, per the phase's own checkpoint of "no chunking yet")
+- [X] T011 Implement `DocumentInput.tsx` — paste target, live character counter against the cap, refusal at the cap, `beforeunload` warning — `src/features/documents/ui/DocumentInput.tsx` (FR-001, FR-003, FR-004)
 
 **Checkpoint**: A user can paste a document, watch the counter, get refused at 50,000 characters,
 and get warned before a reload discards their work. No chunking yet.
