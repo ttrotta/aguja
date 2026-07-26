@@ -87,17 +87,17 @@ required; verify with the network throttled offline after first paint.
 
 ### Worker and tokenizer for User Story 1 (completes the fourth strategy — research.md R-004)
 
-- [ ] T027 [P] [US1] Define the worker message protocol types (`Request`/`Response`) in `src/features/retrieval/embedding/protocol.ts` per contracts/domain-api.md §4
-- [ ] T028 [P] [US1] Write failing tests for `chunkByTokens` — takes `TokenSpan[]`, never imports a tokenizer — in `src/features/chunking/domain/tokens.test.ts`
-- [ ] T029 [US1] Implement `chunkByTokens` in `src/features/chunking/domain/tokens.ts` (passes T028)
-- [ ] T030 [US1] Implement `embedder.worker.ts` — `load-tokenizer` and `tokenize` handlers, `tokenizer-ready`/`progress`/`error` messages — `src/features/retrieval/embedding/embedder.worker.ts` (depends on T027)
-- [ ] T031 [US1] Implement the `useEmbedder.ts` hook — worker lifecycle, `tokenizerReady` state, progress — `src/features/retrieval/embedding/useEmbedder.ts` (depends on T030)
-- [ ] T032 [US1] Implement `LoadProgress.tsx` for tokenizer-download progress — `src/features/retrieval/ui/LoadProgress.tsx` (FR-019, tokenizer portion)
-- [ ] T033 [US1] Wire the tokens strategy into `StrategyControls`/`ChunkedDocument`, gated on `tokenizerReady`, not on the model (FR-011)
+- [X] T027 [P] [US1] Define the worker message protocol types (`Request`/`Response`) in `src/features/retrieval/embedding/protocol.ts` per contracts/domain-api.md §4
+- [X] T028 [P] [US1] Write failing tests for `chunkByTokens` — takes `TokenSpan[]`, never imports a tokenizer — in `src/features/chunking/domain/tokens.test.ts`
+- [X] T029 [US1] Implement `chunkByTokens` in `src/features/chunking/domain/tokens.ts` (passes T028)
+- [X] T030 [US1] Implement `embedder.worker.ts` — `load-tokenizer` and `tokenize` handlers, `tokenizer-ready`/`progress`/`error` messages — `src/features/retrieval/embedding/embedder.worker.ts` (depends on T027) (offsets are reconstructed by matching wordpieces against the source text — the JS tokenizer exposes no offset-mapping API, unlike Python's fast tokenizers)
+- [X] T031 [US1] Implement the `useEmbedder.ts` hook — worker lifecycle, `tokenizerReady` state, progress — `src/features/retrieval/embedding/useEmbedder.ts` (depends on T030)
+- [X] T032 [US1] Implement `LoadProgress.tsx` for tokenizer-download progress — `src/features/retrieval/ui/LoadProgress.tsx` (FR-019, tokenizer portion)
+- [X] T033 [US1] Wire the tokens strategy into `StrategyControls`/`ChunkedDocument`, gated on `tokenizerReady`, not on the model (FR-011) — verified end-to-end in a real browser: tokenizer downloads from the HF CDN, the option unlocks, and chunk reconstruction is exact over a 4.7k-character document
 
 ### End-to-end for User Story 1
 
-- [ ] T034 [P] [US1] Write `e2e/chunking.spec.ts` covering SC-001, SC-002, SC-003, SC-010 per quickstart.md
+- [X] T034 [P] [US1] Write `e2e/chunking.spec.ts` covering SC-001, SC-002, SC-003, SC-010 per quickstart.md
 
 **Checkpoint**: All four chunking strategies work; only "by tokenization units" waits on the
 ~0.7 MB tokenizer, never on the 21.9 MB model. P1 is complete and independently shippable — if the
