@@ -1,0 +1,20 @@
+import type { Chunk } from "./chunk";
+
+export function chunkFixedSizeOverlap(content: string, size: number, overlap: number): Chunk[] {
+  if (overlap >= size) {
+    throw new Error("overlap must be less than size");
+  }
+  if (content.trim().length === 0) return [];
+
+  const chunks: Chunk[] = [];
+  let start = 0;
+  let index = 0;
+  while (start < content.length) {
+    const end = Math.min(start + size, content.length);
+    chunks.push({ index, start, end, text: content.slice(start, end), length: end - start });
+    if (end === content.length) break;
+    start = end - overlap;
+    index += 1;
+  }
+  return chunks;
+}
