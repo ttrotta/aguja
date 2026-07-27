@@ -143,10 +143,10 @@ regress — it is the verifiable form of Principle V.
 
 **Independent Test**: spec.md US3 Independent Test.
 
-- [ ] T047 [P] [US3] Write failing tests for the comparison domain — exactly two sides, structurally, not a list capped at two — in `src/features/comparison/domain/comparison.test.ts` (FR-022)
-- [ ] T048 [US3] Implement `comparison.ts` (passes T047)
-- [ ] T049 [US3] Implement `ComparisonView.tsx` — two rankings side by side; selecting a source passage shows its rank and score under both strategies — `src/features/comparison/ui/ComparisonView.tsx` (FR-022, FR-023)
-- [ ] T050 [US3] Wire comparison mode into `src/app/page.tsx` — no control exists to add a third strategy
+- [X] T047 [P] [US3] Write failing tests for the comparison domain — exactly two sides, structurally, not a list capped at two — in `src/features/comparison/domain/comparison.test.ts` (FR-022)
+- [X] T048 [US3] Implement `comparison.ts` (passes T047) (also adds `resultAtOffset`, needed for T049/FR-023: the two sides chunk the document differently, so a single passage offset resolves to a different chunk — and ranked result — on each side)
+- [X] T049 [US3] Implement `ComparisonView.tsx` — two rankings side by side; selecting a source passage shows its rank and score under both strategies — `src/features/comparison/ui/ComparisonView.tsx` (FR-022, FR-023) (reuses `ChunkedDocument`/`RankedResults` per side rather than duplicating their rendering; selection is a shared passage offset, translated to each side's own chunk index via `resultAtOffset`)
+- [X] T050 [US3] Wire comparison mode into `src/app/page.tsx` — no control exists to add a third strategy (a boolean toggle switches between the single-strategy view and two fixed strategy slots; extracted the chunk-computation effect/memo pair into a `useChunks` hook, shared by the single view and both comparison sides instead of duplicated three times; verified end-to-end in a real browser — both sides render independently and the cross-highlight banner shows correct rank/score on each side)
 
 **Checkpoint**: P3 complete atop P1 and P2.
 

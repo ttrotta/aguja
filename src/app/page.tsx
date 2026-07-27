@@ -1,22 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { DocumentInput } from "@/features/documents/ui/DocumentInput";
 import { isEmpty } from "@/features/documents/domain/document";
 import { StrategyControls } from "@/features/chunking/ui/StrategyControls";
 import { ChunkedDocument } from "@/features/chunking/ui/ChunkedDocument";
-import {
-  chunk,
-  chunkByTokens,
-  validateStrategy,
-  type Chunk,
-  type ChunkingStrategy,
-} from "@/features/chunking/domain";
+import { useChunks } from "@/features/chunking/ui/useChunks";
+import { type ChunkingStrategy } from "@/features/chunking/domain";
 import { useEmbedder } from "@/features/retrieval/embedding/useEmbedder";
 import { LoadProgress } from "@/features/retrieval/ui/LoadProgress";
 import { QueryInput } from "@/features/retrieval/ui/QueryInput";
 import { RankedResults } from "@/features/retrieval/ui/RankedResults";
 import { rankChunks, type RankedResult } from "@/features/retrieval/domain";
+import { ComparisonView } from "@/features/comparison/ui/ComparisonView";
 
 type QueryState = {
   status: "idle" | "running" | "error";
@@ -25,16 +21,39 @@ type QueryState = {
   error: string | null;
 };
 
+type CompareQueryState = {
+  status: "idle" | "running" | "error";
+  leftResults: RankedResult[];
+  rightResults: RankedResult[];
+  error: string | null;
+};
+
 const INITIAL_QUERY_STATE: QueryState = { status: "idle", query: "", results: [], error: null };
+const INITIAL_COMPARE_STATE: CompareQueryState = {
+  status: "idle",
+  leftResults: [],
+  rightResults: [],
+  error: null,
+};
 
 export default function Home() {
   // Session-scoped only (D-005) — nothing here is persisted across a reload.
   const [documentContent, setDocumentContent] = useState("");
   const [strategy, setStrategy] = useState<ChunkingStrategy>({ type: "fixed-size", size: 500 });
-  const [tokenChunks, setTokenChunks] = useState<Chunk[]>([]);
   const [selectedChunkIndex, setSelectedChunkIndex] = useState<number | null>(null);
   const [queryText, setQueryText] = useState("");
   const [queryState, setQueryState] = useState<QueryState>(INITIAL_QUERY_STATE);
+
+  // US3 (P3): comparing exactly two strategies. Two fixed slots, not a list —
+  // there is structurally no control anywhere below that could add a third
+  // (FR-022).
+  const [compareMode, setCompareMode] = useState(false);
+  const [leftStrategy, setLeftStrategy] = useState<ChunkingStrategy>({
+    type: "fixed-size",
+    size: 500,
+  });
+  const [rightStrategy, setRightStrategy] = useState<ChunkingStrategy>({ type: "paragraphs" });
+  const [compareState, setCompareState] = useState<CompareQueryState>(INITIAL_COMPARE_STATE);
 
   const {
     tokenizerReady,
@@ -56,6 +75,7 @@ export default function Home() {
     setDocumentContent(next);
     setSelectedChunkIndex(null);
     setQueryState(INITIAL_QUERY_STATE);
+    setCompareState(INITIAL_COMPARE_STATE);
   }
 
   function handleStrategyChange(next: ChunkingStrategy) {
@@ -64,32 +84,19 @@ export default function Home() {
     setQueryState(INITIAL_QUERY_STATE);
   }
 
-  // The three model-free strategies are pure derived state (FR-011, FR-007).
-  // Only the tokens strategy needs an effect below, because it awaits the
-  // worker — everything else recomputes synchronously on every keystroke.
-  const syncChunks = useMemo(() => {
-    if (strategy.type === "tokens" || !validateStrategy(strategy).valid) return [];
-    return chunk(documentContent, strategy);
-  }, [documentContent, strategy]);
+  function handleLeftStrategyChange(next: ChunkingStrategy) {
+    setLeftStrategy(next);
+    setCompareState(INITIAL_COMPARE_STATE);
+  }
 
-  useEffect(() => {
-    if (strategy.type !== "tokens" || !validateStrategy(strategy).valid) return;
-    if (tokenizerReady !== "ready") return;
+  function handleRightStrategyChange(next: ChunkingStrategy) {
+    setRightStrategy(next);
+    setCompareState(INITIAL_COMPARE_STATE);
+  }
 
-    let cancelled = false;
-    const size = strategy.size;
-    tokenize(documentContent).then((spans) => {
-      if (!cancelled) setTokenChunks(chunkByTokens(documentContent, spans, size));
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [documentContent, strategy, tokenizerReady, tokenize]);
-
-  const chunks =
-    strategy.type === "tokens" && tokenizerReady === "ready" && validateStrategy(strategy).valid
-      ? tokenChunks
-      : syncChunks;
+  const chunks = useChunks(documentContent, strategy, tokenizerReady, tokenize);
+  const leftChunks = useChunks(documentContent, leftStrategy, tokenizerReady, tokenize);
+  const rightChunks = useChunks(documentContent, rightStrategy, tokenizerReady, tokenize);
 
   // Acceptance scenario 4 (spec.md): a document with no blank lines under
   // "paragraphs" must explain itself, not just render one silent chunk.
@@ -98,12 +105,16 @@ export default function Home() {
       ? "No blank lines found — the whole document is treated as one paragraph."
       : null;
 
+  const activeChunkCount = compareMode
+    ? Math.min(leftChunks.length, rightChunks.length)
+    : chunks.length;
+
   const queryDisabledReason =
     modelReady === "loading"
       ? "Downloading the model — querying isn't available yet."
       : modelReady === "failed"
         ? "Model failed to load, so querying is unavailable."
-        : chunks.length === 0
+        : activeChunkCount === 0
           ? "No chunks to search yet."
           : undefined;
 
@@ -131,6 +142,36 @@ export default function Home() {
     }
   }
 
+  // Same document, same query, scored under both strategies at once — one
+  // embed() batch covers the query plus every chunk from both sides, then
+  // each side is ranked independently against its own slice (FR-022).
+  async function handleCompareQuerySubmit(text: string) {
+    setCompareState({ status: "running", leftResults: [], rightResults: [], error: null });
+    try {
+      const leftTexts = leftChunks.map((c) => c.text.trim());
+      const rightTexts = rightChunks.map((c) => c.text.trim());
+      const embeddings = await embed([text, ...leftTexts, ...rightTexts]);
+      const [queryEmbedding, ...rest] = embeddings;
+      const leftEmbeddings = rest.slice(0, leftTexts.length);
+      const rightEmbeddings = rest.slice(leftTexts.length);
+      setCompareState({
+        status: "idle",
+        leftResults: rankChunks(queryEmbedding, leftEmbeddings),
+        rightResults: rankChunks(queryEmbedding, rightEmbeddings),
+        error: null,
+      });
+    } catch (error) {
+      setCompareState({
+        status: "error",
+        leftResults: [],
+        rightResults: [],
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  const activeQueryState = compareMode ? compareState : queryState;
+
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-12">
       <header>
@@ -143,11 +184,36 @@ export default function Home() {
       <DocumentInput value={documentContent} onChange={handleDocumentChange} />
       {!isEmpty(documentContent) && (
         <>
-          <StrategyControls
-            strategy={strategy}
-            onChange={handleStrategyChange}
-            tokenizerReady={tokenizerReady === "ready"}
-          />
+          <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <input
+              type="checkbox"
+              checked={compareMode}
+              onChange={(event) => setCompareMode(event.target.checked)}
+            />
+            Compare two strategies
+          </label>
+
+          {compareMode ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <StrategyControls
+                strategy={leftStrategy}
+                onChange={handleLeftStrategyChange}
+                tokenizerReady={tokenizerReady === "ready"}
+              />
+              <StrategyControls
+                strategy={rightStrategy}
+                onChange={handleRightStrategyChange}
+                tokenizerReady={tokenizerReady === "ready"}
+              />
+            </div>
+          ) : (
+            <StrategyControls
+              strategy={strategy}
+              onChange={handleStrategyChange}
+              tokenizerReady={tokenizerReady === "ready"}
+            />
+          )}
+
           <LoadProgress
             label="tokenizer"
             state={tokenizerReady}
@@ -155,13 +221,17 @@ export default function Home() {
             error={tokenizerError}
             fallbackNote="Fixed-size, fixed-size-overlap, and paragraph chunking still work without it."
           />
-          <ChunkedDocument
-            content={documentContent}
-            chunks={chunks}
-            notice={paragraphNotice}
-            selectedIndex={selectedChunkIndex}
-            onSelectIndex={setSelectedChunkIndex}
-          />
+
+          {!compareMode && (
+            <ChunkedDocument
+              content={documentContent}
+              chunks={chunks}
+              notice={paragraphNotice}
+              selectedIndex={selectedChunkIndex}
+              onSelectIndex={setSelectedChunkIndex}
+            />
+          )}
+
           <LoadProgress
             label="model"
             state={modelReady}
@@ -172,21 +242,34 @@ export default function Home() {
           <QueryInput
             value={queryText}
             onChange={setQueryText}
-            onSubmit={handleQuerySubmit}
-            disabled={modelReady !== "ready" || chunks.length === 0}
+            onSubmit={compareMode ? handleCompareQuerySubmit : handleQuerySubmit}
+            disabled={modelReady !== "ready" || activeChunkCount === 0}
             disabledReason={queryDisabledReason}
           />
-          {queryState.status === "error" && (
+          {activeQueryState.status === "error" && (
             <p role="alert" className="text-sm text-red-600 dark:text-red-400">
-              Query failed: {queryState.error}
+              Query failed: {activeQueryState.error}
             </p>
           )}
-          <RankedResults
-            results={queryState.results}
-            chunks={chunks}
-            selectedIndex={selectedChunkIndex}
-            onSelectIndex={setSelectedChunkIndex}
-          />
+
+          {compareMode ? (
+            <ComparisonView
+              content={documentContent}
+              left={{ strategy: leftStrategy, chunks: leftChunks, results: compareState.leftResults }}
+              right={{
+                strategy: rightStrategy,
+                chunks: rightChunks,
+                results: compareState.rightResults,
+              }}
+            />
+          ) : (
+            <RankedResults
+              results={queryState.results}
+              chunks={chunks}
+              selectedIndex={selectedChunkIndex}
+              onSelectIndex={setSelectedChunkIndex}
+            />
+          )}
         </>
       )}
     </main>

@@ -10,7 +10,7 @@ type StrategyControlsProps = {
   tokenizerReady: boolean;
 };
 
-const STRATEGY_LABELS: Record<ChunkingStrategy["type"], string> = {
+export const STRATEGY_LABELS: Record<ChunkingStrategy["type"], string> = {
   "fixed-size": "Fixed size",
   "fixed-size-overlap": "Fixed size with overlap",
   paragraphs: "Paragraphs",
