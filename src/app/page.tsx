@@ -240,6 +240,12 @@ export default function Home() {
             error={modelError}
             fallbackNote="Chunk visualization above still works without it; only querying is unavailable."
           />
+          {/* D-006/FR-026: non-English text is not blocked, but its scores are not
+              trustworthy — the model was picked for a small download, not language
+              coverage, and that trade-off has to be said outright, not discovered. */}
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            The embedding model is English-only. Scores for non-English text are not meaningful.
+          </p>
           <QueryInput
             value={queryText}
             onChange={setQueryText}
