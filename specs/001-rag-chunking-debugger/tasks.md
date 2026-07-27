@@ -170,9 +170,9 @@ top-ranked chunks.
 
 **Purpose**: Requirements that span every story, closed out once everything else is green.
 
-- [ ] T053 [P] Add the English-only notice near the query input / model status (FR-026)
-- [ ] T054 Run the full quickstart.md validation checklist — every e2e suite green, the manual first-run smoke test steps 1–6 confirmed by hand
-- [ ] T055 Re-run the Constitution Check from plan.md against the finished implementation; record any drift as a new entry in `docs/decisions.md`, never by editing plan.md's original check
+- [X] T053 [P] Add the English-only notice near the query input / model status (FR-026)
+- [X] T054 Run the full quickstart.md validation checklist — every e2e suite green, the manual first-run smoke test steps 1–6 confirmed by hand (found the full e2e suite's default worker count oversubscribed CPU/bandwidth badly on this 16-core box — 8 parallel real ~23MB model downloads blew SC-006's 15s post-ready budget purely from contention, not an app regression; fixed by capping `workers: 4` in playwright.config.ts, confirmed clean at that concurrency. Manually verified SC-005 — reload took 1.6s with zero HF requests fired, confirming Cache API reuse — and FR-020 — blocking the CDN produces explicit tokenizer/model error banners each naming what still works, with chunking confirmed genuinely functional throughout. Network audit also surfaced that HF's asset delivery spans both `huggingface.co` and its `*.hf.co` Xet storage backend, both HF-owned — consistent with, not a violation of, the CDN-only contract)
+- [X] T055 Re-run the Constitution Check from plan.md against the finished implementation; record any drift as a new entry in `docs/decisions.md`, never by editing plan.md's original check (every gate still PASSes against the finished code — confirmed domain/ui/embedding boundaries hold, no new dependencies, `src/` structure matches plan.md's tree aside from a few disclosed additions: `chunking/ui/useChunks.ts`, `retrieval/domain/embedding.ts` and `index.ts`, none of which cross a layer boundary. Two genuine drifts recorded as D-008 and D-009: the 256-token ceiling had to be enforced explicitly rather than trusted to the tokenizer's own 512 default, and Playwright's worker count had to be capped to stop CPU/bandwidth contention among real-model-download specs from producing a false SC-006 failure)
 
 ---
 

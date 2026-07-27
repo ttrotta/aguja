@@ -199,3 +199,66 @@ specification should not be read as promising more. Very large documents will fe
 they need to. If the 15-second budget is missed on real hardware, this is the decision to
 revisit, and revisiting it costs the cross-run guarantee, so the trade must be measured rather
 than assumed.
+
+---
+
+## D-008 — Enforce the 256-token ceiling explicitly, rather than trust the tokenizer's default
+
+**Date**: 2026-07-27 · **Status**: Accepted
+
+**Context.** D-006 states the model truncates at 256 tokens, and FR-017 depends on that number
+being right — it is what `truncated`/`tokenCount`/`totalTokens` are computed against. Implementing
+T039, the model repo's own `tokenizer_config.json` was checked directly: it declares
+`model_max_length: 512`, inherited from the underlying `bert-base-uncased` tower, not 256. The 256
+figure is a `sentence-transformers` library convention (`all-MiniLM-L6-v2`'s own encode default),
+which the Xenova ONNX conversion does not carry over — nothing in the converted model's own files
+enforces it.
+
+Transformers.js's tokenizer, called with `truncation: true` and no `max_length`, defaults to the
+tokenizer's own `model_max_length`. Left alone, that would have silently truncated at 512 tokens,
+not 256 — quietly contradicting D-006 and CLAUDE.md's own stated ground truth, and making FR-017's
+`truncated` flag wrong for any chunk between 256 and 512 tokens.
+
+**Decision.** Pass `max_length: 256` explicitly on every tokenizer call in `embedder.worker.ts`
+(both the truncated encode used for embedding and the count used to compute `totalTokens`), rather
+than rely on the tokenizer's own default.
+
+**Why.** D-006 is the source of truth for this number, not the model repo's tokenizer config —
+the config reflects the base BERT tower's architectural limit, not the sentence-embedding
+convention D-006 was written against. Hardcoding 256 in the worker is what makes the two agree.
+
+**Consequences.** If `all-MiniLM-L6-v2` is ever swapped for a model with a genuinely different
+intended ceiling, this constant has to move with it — it is not derived from anything the model
+repo publishes, so nothing will fail loudly if it drifts out of sync with a future model swap.
+
+---
+
+## D-009 — Cap Playwright's worker count for the real-model e2e specs
+
+**Date**: 2026-07-27 · **Status**: Accepted
+
+**Context.** `retrieval.spec.ts` and `no-network-leak.spec.ts` each do a real ~23 MB model download
+and WASM session init per test, against the live Hugging Face CDN — no mocking, per this project's
+own practice of verifying the worker pipeline for real rather than trusting fixtures. Running the
+full e2e suite with Playwright's default worker count (roughly half the machine's logical cores —
+8, on the 16-core box this was validated on) oversubscribes both CPU and bandwidth badly: 8
+simultaneous real downloads plus 8 simultaneous WASM compiles starve each other. During T054's
+full-suite validation run, this alone was enough to blow SC-006's 15-second post-model-ready
+budget (observed ~49s) on a query over a 6-chunk document that completed in ~6s when the same spec
+ran with `--workers=1`. This was contention, not a product regression — the same test passed
+comfortably once concurrency was reduced.
+
+**Decision.** Cap `workers: 4` in `playwright.config.ts`.
+
+**Why.** SC-006's budget is a real product contract, and loosening the assertion's threshold to
+paper over contention would hide a genuine future regression along with today's false one. The
+correct fix is matching test concurrency to what the machine can actually sustain for this kind of
+work, not weakening what is being measured. Four concurrent real downloads left the suite
+consistently green across repeated runs on this hardware; the chunking-only specs, which need no
+network, remain effectively free to parallelize regardless.
+
+**Consequences.** The e2e suite takes proportionally longer on machines with fewer cores than this
+one, and a CI runner with less CPU/bandwidth than a developer's desktop could still see this
+budget missed for reasons unrelated to the app. If that happens, the honest fix is a
+resource-aware `workers` value (or a separate low-concurrency project just for these two specs),
+not a larger millisecond threshold — the number in the spec is the number to defend.
