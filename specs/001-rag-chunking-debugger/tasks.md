@@ -113,24 +113,24 @@ budget collapses here, what ships is honest and whole, per the constitution.
 
 ### Tests for User Story 2
 
-- [ ] T035 [P] [US2] Write failing tests for `cosineSimilarity` — self-similarity is 1 for a normalized vector; dimension mismatch throws — in `src/features/retrieval/domain/similarity.test.ts`
-- [ ] T036 [P] [US2] Write failing tests for `rankChunks` — every chunk gets exactly one result; `rank` is `1..n` with no gaps or duplicates; ties break by ascending `chunkIndex`; output is deterministic regardless of input order — in `src/features/retrieval/domain/ranking.test.ts` (FR-014, FR-015, FR-016, SC-007)
+- [X] T035 [P] [US2] Write failing tests for `cosineSimilarity` — self-similarity is 1 for a normalized vector; dimension mismatch throws — in `src/features/retrieval/domain/similarity.test.ts`
+- [X] T036 [P] [US2] Write failing tests for `rankChunks` — every chunk gets exactly one result; `rank` is `1..n` with no gaps or duplicates; ties break by ascending `chunkIndex`; output is deterministic regardless of input order — in `src/features/retrieval/domain/ranking.test.ts` (FR-014, FR-015, FR-016, SC-007)
 
 ### Implementation for User Story 2
 
-- [ ] T037 [P] [US2] Implement `cosineSimilarity` in `src/features/retrieval/domain/similarity.ts` (passes T035)
-- [ ] T038 [US2] Implement `rankChunks` in `src/features/retrieval/domain/ranking.ts` (passes T036)
-- [ ] T039 [US2] Extend `embedder.worker.ts` with `load-model` and `embed` handlers — WASM backend pinned, fixed thread count (D-007), output L2-normalized, `truncated`/`tokenCount`/`totalTokens` reported per input (depends on T030; research.md R-003, contracts/domain-api.md §4)
-- [ ] T040 [US2] Extend `useEmbedder.ts` with `modelReady` state and an `embed()` method (depends on T031, T039)
-- [ ] T041 [US2] Implement `QueryInput.tsx` — non-empty validation, submit — `src/features/retrieval/ui/QueryInput.tsx`
-- [ ] T042 [US2] Implement `RankedResults.tsx` — the full ranked list with scores and truncation flags; selecting a result highlights its chunk in `ChunkedDocument` — `src/features/retrieval/ui/RankedResults.tsx` (FR-014, FR-017, FR-018)
-- [ ] T043 [US2] Extend `LoadProgress.tsx` for model-download progress; render an explicit failed state naming what still works — `src/features/retrieval/ui/LoadProgress.tsx` (FR-019 model portion, FR-020)
-- [ ] T044 [US2] Wire retrieval into `src/app/page.tsx` — a query submitted before the model is ready is queued or its control is disabled with the reason shown, never silently ignored
+- [X] T037 [P] [US2] Implement `cosineSimilarity` in `src/features/retrieval/domain/similarity.ts` (passes T035)
+- [X] T038 [US2] Implement `rankChunks` in `src/features/retrieval/domain/ranking.ts` (passes T036) (`RankedResult` also carries `tokenCount`/`totalTokens` through from `Embedding`, not just `truncated` — data-model.md's field list alone doesn't satisfy FR-017's "indicate how much", so the two extra fields were added)
+- [X] T039 [US2] Extend `embedder.worker.ts` with `load-model` and `embed` handlers — WASM backend pinned, fixed thread count (D-007), output L2-normalized, `truncated`/`tokenCount`/`totalTokens` reported per input (depends on T030; research.md R-003, contracts/domain-api.md §4) (the model's tokenizer_config.json declares `model_max_length: 512`, inherited from bert-base-uncased — the 256-token ceiling CLAUDE.md/D-006 describe is a sentence-transformers convention this ONNX port does not carry over, so `max_length: 256` is passed explicitly rather than relying on the tokenizer's own truncation default)
+- [X] T040 [US2] Extend `useEmbedder.ts` with `modelReady` state and an `embed()` method (depends on T031, T039)
+- [X] T041 [US2] Implement `QueryInput.tsx` — non-empty validation, submit — `src/features/retrieval/ui/QueryInput.tsx`
+- [X] T042 [US2] Implement `RankedResults.tsx` — the full ranked list with scores and truncation flags; selecting a result highlights its chunk in `ChunkedDocument` — `src/features/retrieval/ui/RankedResults.tsx` (FR-014, FR-017, FR-018) (selection was lifted out of `ChunkedDocument`'s internal state into a controlled `selectedIndex`/`onSelectIndex` pair shared with `RankedResults`, since FR-018 requires the two to stay in sync)
+- [X] T043 [US2] Extend `LoadProgress.tsx` for model-download progress; render an explicit failed state naming what still works — `src/features/retrieval/ui/LoadProgress.tsx` (FR-019 model portion, FR-020) (the component was already generic over `label`/`state`/`progress`/`error`/`fallbackNote`, so no code change was needed — `page.tsx` renders a second instance for the model)
+- [X] T044 [US2] Wire retrieval into `src/app/page.tsx` — a query submitted before the model is ready is queued or its control is disabled with the reason shown, never silently ignored (disabled, with the reason shown via `QueryInput`'s `disabledReason`; pasting a new document or switching strategy clears the stale ranking, since its chunk indices would no longer line up)
 
 ### End-to-end for User Story 2
 
-- [ ] T045 [P] [US2] Write `e2e/retrieval.spec.ts` covering SC-004, SC-006, SC-007 per quickstart.md
-- [ ] T046 [P] [US2] Write `e2e/no-network-leak.spec.ts` — intercept every request across a full session (paste, chunk, query, compare, export) and assert none carries document or query text (SC-009, FR-013)
+- [X] T045 [P] [US2] Write `e2e/retrieval.spec.ts` covering SC-004, SC-006, SC-007 per quickstart.md (also covers FR-014, FR-015, FR-017, FR-018 against the real worker/model — no mocking; verified passing against the live Hugging Face CDN)
+- [X] T046 [P] [US2] Write `e2e/no-network-leak.spec.ts` — intercept every request across a full session (paste, chunk, query, compare, export) and assert none carries document or query text (SC-009, FR-013) (comparison/export don't exist yet — Phase 5/6 — so the session covers paste, chunk, and query; extend when those land)
 
 **Checkpoint**: P2 complete atop P1, independently demoable. T046 is the test that must never
 regress — it is the verifiable form of Principle V.
