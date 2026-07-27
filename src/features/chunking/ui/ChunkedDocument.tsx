@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type { Chunk } from "../domain/chunk";
 import { toSegments } from "../domain/segments";
 
@@ -9,10 +8,22 @@ type ChunkedDocumentProps = {
   chunks: Chunk[];
   /** Surfaced above the boundaries, e.g. paragraphs finding no separator (SC-010). */
   notice?: string | null;
+  /**
+   * Controlled rather than internal state — selection is shared with
+   * RankedResults, so choosing a result there highlights its chunk here
+   * (FR-018) and vice versa.
+   */
+  selectedIndex: number | null;
+  onSelectIndex: (chunkIndex: number) => void;
 };
 
-export function ChunkedDocument({ content, chunks, notice }: ChunkedDocumentProps) {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+export function ChunkedDocument({
+  content,
+  chunks,
+  notice,
+  selectedIndex,
+  onSelectIndex,
+}: ChunkedDocumentProps) {
   const segments = toSegments(chunks, content.length);
   const selectedChunk = selectedIndex === null ? null : (chunks[selectedIndex] ?? null);
 
@@ -35,7 +46,7 @@ export function ChunkedDocument({ content, chunks, notice }: ChunkedDocumentProp
               key={segment.start}
               role="button"
               tabIndex={0}
-              onClick={() => setSelectedIndex(segment.chunkIndices[0])}
+              onClick={() => onSelectIndex(segment.chunkIndices[0])}
               title={`chunk ${segment.chunkIndices.join(", ")} — ${segment.end - segment.start} characters`}
               className={[
                 "cursor-pointer",
@@ -62,7 +73,7 @@ export function ChunkedDocument({ content, chunks, notice }: ChunkedDocumentProp
             <li key={c.index}>
               <button
                 type="button"
-                onClick={() => setSelectedIndex(c.index)}
+                onClick={() => onSelectIndex(c.index)}
                 className={[
                   "rounded-md border px-2 py-1",
                   selectedIndex === c.index

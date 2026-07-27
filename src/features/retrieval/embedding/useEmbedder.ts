@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { TokenSpan } from "../../chunking/domain/tokens";
+import type { Embedding } from "../domain/embedding";
 import type { Request, Response } from "./protocol";
 
 type ReadinessState = "idle" | "loading" | "ready" | "failed";
@@ -11,11 +12,17 @@ type PendingTokenize = {
   reject: (error: Error) => void;
 };
 
+type PendingEmbed = {
+  resolve: (embeddings: Embedding[]) => void;
+  reject: (error: Error) => void;
+};
+
 let nextRequestId = 0;
 
 export function useEmbedder() {
   const workerRef = useRef<Worker | null>(null);
-  const pendingRef = useRef<Map<string, PendingTokenize>>(new Map());
+  const pendingTokenizeRef = useRef<Map<string, PendingTokenize>>(new Map());
+  const pendingEmbedRef = useRef<Map<string, PendingEmbed>>(new Map());
 
   // Starts at "loading", not "idle" — the mount effect below always
   // requests the tokenizer immediately, so there is no real idle period.
@@ -24,6 +31,12 @@ export function useEmbedder() {
   const [tokenizerReady, setTokenizerReady] = useState<ReadinessState>("loading");
   const [tokenizerProgress, setTokenizerProgress] = useState(0);
   const [tokenizerError, setTokenizerError] = useState<string | null>(null);
+
+  // The model (21.9 MB) loads independently of the tokenizer (0.7 MB) — R-004 —
+  // so it gets its own readiness state rather than folding into tokenizerReady.
+  const [modelReady, setModelReady] = useState<ReadinessState>("loading");
+  const [modelProgress, setModelProgress] = useState(0);
+  const [modelError, setModelError] = useState<string | null>(null);
 
   useEffect(() => {
     const worker = new Worker(new URL("./embedder.worker.ts", import.meta.url), {
@@ -40,31 +53,45 @@ export function useEmbedder() {
         case "progress":
           if (response.target === "tokenizer" && response.total > 0) {
             setTokenizerProgress(response.loaded / response.total);
+          } else if (response.target === "model" && response.total > 0) {
+            setModelProgress(response.loaded / response.total);
           }
           break;
         case "error":
           if (response.target === "tokenizer") {
             setTokenizerReady("failed");
             setTokenizerError(response.message);
+          } else {
+            setModelReady("failed");
+            setModelError(response.message);
           }
           break;
         case "tokenized": {
-          const pending = pendingRef.current.get(response.id);
+          const pending = pendingTokenizeRef.current.get(response.id);
           if (pending) {
-            pendingRef.current.delete(response.id);
+            pendingTokenizeRef.current.delete(response.id);
             pending.resolve(response.spans);
           }
           break;
         }
         case "model-ready":
-        case "embedded":
-          // Wired in T039–T040 (User Story 2).
+          setModelReady("ready");
           break;
+        case "embedded": {
+          const pending = pendingEmbedRef.current.get(response.id);
+          if (pending) {
+            pendingEmbedRef.current.delete(response.id);
+            pending.resolve(response.embeddings);
+          }
+          break;
+        }
       }
     });
 
-    const request: Request = { type: "load-tokenizer" };
-    worker.postMessage(request);
+    const loadTokenizer: Request = { type: "load-tokenizer" };
+    const loadModel: Request = { type: "load-model" };
+    worker.postMessage(loadTokenizer);
+    worker.postMessage(loadModel);
 
     return () => {
       worker.terminate();
@@ -80,11 +107,34 @@ export function useEmbedder() {
         return;
       }
       const id = String(nextRequestId++);
-      pendingRef.current.set(id, { resolve, reject });
+      pendingTokenizeRef.current.set(id, { resolve, reject });
       const request: Request = { type: "tokenize", id, text };
       worker.postMessage(request);
     });
   }, []);
 
-  return { tokenizerReady, tokenizerProgress, tokenizerError, tokenize };
+  const embed = useCallback((texts: string[]): Promise<Embedding[]> => {
+    return new Promise((resolve, reject) => {
+      const worker = workerRef.current;
+      if (!worker) {
+        reject(new Error("Worker is not available."));
+        return;
+      }
+      const id = String(nextRequestId++);
+      pendingEmbedRef.current.set(id, { resolve, reject });
+      const request: Request = { type: "embed", id, texts };
+      worker.postMessage(request);
+    });
+  }, []);
+
+  return {
+    tokenizerReady,
+    tokenizerProgress,
+    tokenizerError,
+    tokenize,
+    modelReady,
+    modelProgress,
+    modelError,
+    embed,
+  };
 }

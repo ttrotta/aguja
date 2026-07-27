@@ -1,11 +1,7 @@
 import type { TokenSpan } from "../../chunking/domain/tokens";
+import type { Embedding } from "../domain/embedding";
 
-export type Embedding = {
-  vector: Float32Array;
-  truncated: boolean;
-  tokenCount: number;
-  totalTokens: number;
-};
+export type { Embedding };
 
 /** Main thread → worker (contracts/domain-api.md §4). */
 export type Request =

@@ -1,5 +1,6 @@
-import { AutoTokenizer } from "@huggingface/transformers";
+import { AutoModel, AutoTokenizer, env, mean_pooling } from "@huggingface/transformers";
 import type { TokenSpan } from "../../chunking/domain/tokens";
+import type { Embedding } from "../domain/embedding";
 import type { Request, Response } from "./protocol";
 
 // The model repo ID is a Hugging Face Hub identifier, not an npm package —
@@ -7,12 +8,28 @@ import type { Request, Response } from "./protocol";
 // (research.md R-001).
 const MODEL_ID = "Xenova/all-MiniLM-L6-v2";
 
+// sentence-transformers/all-MiniLM-L6-v2's own encode default truncates at
+// 256 word pieces even though the underlying BERT tower supports 512
+// (its tokenizer_config.json carries model_max_length: 512, inherited from
+// bert-base-uncased — the 256 figure is a sentence-transformers convention
+// this ONNX port does not carry over, so it must be enforced here explicitly
+// rather than left to the tokenizer's default `truncation: true`). This is
+// the fixed 256-token ceiling CLAUDE.md and D-006 describe.
+const MAX_MODEL_TOKENS = 256;
+
+// D-007 / R-003: pin WASM, not WebGPU, and a fixed thread count. Capability
+// detection would make scores device-dependent and break SC-007/FR-016.
+if (env.backends.onnx.wasm) {
+  env.backends.onnx.wasm.numThreads = 1;
+}
+
 // Cast rather than adding the "webworker" lib to tsconfig, which would
 // conflict with the "dom" lib the rest of the app needs. Worker's
 // postMessage/addEventListener signatures match the worker global scope's.
 const ctx = self as unknown as Worker;
 
 let tokenizer: Awaited<ReturnType<typeof AutoTokenizer.from_pretrained>> | null = null;
+let model: Awaited<ReturnType<typeof AutoModel.from_pretrained>> | null = null;
 
 function post(message: Response) {
   ctx.postMessage(message);
@@ -72,6 +89,75 @@ function tokenize(id: string, text: string) {
   post({ type: "tokenized", id, spans: computeTokenSpans(text, tokens) });
 }
 
+async function loadModel() {
+  try {
+    // R-003/D-007: device/dtype are pinned explicitly rather than left to
+    // capability-based defaults, for the same determinism reason as the
+    // WASM thread count above.
+    model = await AutoModel.from_pretrained(MODEL_ID, {
+      device: "wasm",
+      dtype: "q8",
+      progress_callback: (info: { status: string; loaded?: number; total?: number }) => {
+        if (info.status === "progress" && info.loaded !== undefined && info.total !== undefined) {
+          post({ type: "progress", target: "model", loaded: info.loaded, total: info.total });
+        }
+      },
+    });
+    post({ type: "model-ready" });
+  } catch (error) {
+    post({
+      type: "error",
+      target: "model",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
+// Word-piece count including the [CLS]/[SEP] special tokens the model
+// actually sees — this is what MAX_MODEL_TOKENS caps, not the raw piece count.
+function countTokens(text: string): number {
+  if (!tokenizer) return 0;
+  return tokenizer.tokenize(text, { add_special_tokens: false }).length + 2;
+}
+
+async function embed(id: string, texts: string[]) {
+  if (!tokenizer || !model) {
+    post({ type: "error", target: "model", message: "Model is not loaded yet." });
+    return;
+  }
+  try {
+    const totalTokensPerText = texts.map(countTokens);
+    const modelInputs = tokenizer(texts, {
+      padding: true,
+      truncation: true,
+      max_length: MAX_MODEL_TOKENS,
+    });
+    const outputs = await model(modelInputs);
+    const pooled = mean_pooling(outputs.last_hidden_state, modelInputs.attention_mask).normalize(
+      2,
+      -1,
+    );
+    const rows = pooled.tolist() as number[][];
+
+    const embeddings: Embedding[] = rows.map((row, i) => {
+      const totalTokens = totalTokensPerText[i];
+      return {
+        vector: Float32Array.from(row),
+        truncated: totalTokens > MAX_MODEL_TOKENS,
+        tokenCount: Math.min(totalTokens, MAX_MODEL_TOKENS),
+        totalTokens,
+      };
+    });
+    post({ type: "embedded", id, embeddings });
+  } catch (error) {
+    post({
+      type: "error",
+      target: "model",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
 ctx.addEventListener("message", (event: MessageEvent<Request>) => {
   const request = event.data;
   switch (request.type) {
@@ -82,9 +168,10 @@ ctx.addEventListener("message", (event: MessageEvent<Request>) => {
       tokenize(request.id, request.text);
       break;
     case "load-model":
+      void loadModel();
+      break;
     case "embed":
-      // Implemented in T039 (User Story 2) — the tokenizer-only slice ships
-      // first so token-based chunking never waits on the 21.9 MB model (R-004).
+      void embed(request.id, request.texts);
       break;
   }
 });
