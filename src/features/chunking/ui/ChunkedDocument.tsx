@@ -6,12 +6,12 @@ import { toSegments } from "../domain/segments";
 type ChunkedDocumentProps = {
   content: string;
   chunks: Chunk[];
-  /** Surfaced above the boundaries, e.g. paragraphs finding no separator (SC-010). */
+  /** Surfaced above the boundaries, e.g. paragraphs finding no separator. */
   notice?: string | null;
   /**
    * Controlled rather than internal state — selection is shared with
    * RankedResults, so choosing a result there highlights its chunk here
-   * (FR-018) and vice versa.
+   * and vice versa.
    */
   selectedIndex: number | null;
   onSelectIndex: (chunkIndex: number) => void;

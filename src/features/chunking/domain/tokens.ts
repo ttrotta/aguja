@@ -1,11 +1,11 @@
 import type { Chunk } from "./chunk";
 
-/** A token's character span in the source content, produced by the worker (R-004). */
+/** A token's character span in the source content, produced by the worker. */
 export type TokenSpan = { start: number; end: number };
 
 /**
  * Token strategy. Takes token boundaries as plain data so the domain never
- * touches a tokenizer (R-004).
+ * touches a tokenizer.
  */
 export function chunkByTokens(content: string, tokenSpans: TokenSpan[], size: number): Chunk[] {
   const chunks: Chunk[] = [];

@@ -1,6 +1,6 @@
 import type { Chunk, Segment } from "./chunk";
 
-/** Collapses a chunk list into non-overlapping renderable segments (R-006). */
+/** Collapses a chunk list into non-overlapping renderable segments. */
 export function toSegments(chunks: Chunk[], contentLength: number): Segment[] {
   if (chunks.length === 0) return [];
 

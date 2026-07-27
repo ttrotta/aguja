@@ -32,8 +32,8 @@ export function useEmbedder() {
   const [tokenizerProgress, setTokenizerProgress] = useState(0);
   const [tokenizerError, setTokenizerError] = useState<string | null>(null);
 
-  // The model (21.9 MB) loads independently of the tokenizer (0.7 MB) — R-004 —
-  // so it gets its own readiness state rather than folding into tokenizerReady.
+  // The model (21.9 MB) loads independently of the tokenizer (0.7 MB), so it
+  // gets its own readiness state rather than folding into tokenizerReady.
   const [modelReady, setModelReady] = useState<ReadinessState>("loading");
   const [modelProgress, setModelProgress] = useState(0);
   const [modelError, setModelError] = useState<string | null>(null);

@@ -3,14 +3,14 @@ import type { Embedding } from "../domain/embedding";
 
 export type { Embedding };
 
-/** Main thread → worker (contracts/domain-api.md §4). */
+/** Main thread → worker. */
 export type Request =
   | { type: "load-tokenizer" }
   | { type: "load-model" }
   | { type: "tokenize"; id: string; text: string }
   | { type: "embed"; id: string; texts: string[] };
 
-/** Worker → main thread (contracts/domain-api.md §4). */
+/** Worker → main thread. */
 export type Response =
   | { type: "tokenizer-ready" }
   | { type: "model-ready" }

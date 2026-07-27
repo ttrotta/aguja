@@ -4,21 +4,19 @@ import type { Embedding } from "../domain/embedding";
 import type { Request, Response } from "./protocol";
 
 // The model repo ID is a Hugging Face Hub identifier, not an npm package —
-// it stays "Xenova/..." even though the package is @huggingface/transformers
-// (research.md R-001).
+// it stays "Xenova/..." even though the package is @huggingface/transformers.
 const MODEL_ID = "Xenova/all-MiniLM-L6-v2";
 
 // sentence-transformers/all-MiniLM-L6-v2's own encode default truncates at
-// 256 word pieces even though the underlying BERT tower supports 512
-// (its tokenizer_config.json carries model_max_length: 512, inherited from
+// 256 word pieces even though the underlying BERT tower supports 512 (its
+// tokenizer_config.json carries model_max_length: 512, inherited from
 // bert-base-uncased — the 256 figure is a sentence-transformers convention
 // this ONNX port does not carry over, so it must be enforced here explicitly
-// rather than left to the tokenizer's default `truncation: true`). This is
-// the fixed 256-token ceiling CLAUDE.md and D-006 describe.
+// rather than left to the tokenizer's default `truncation: true`).
 const MAX_MODEL_TOKENS = 256;
 
-// D-007 / R-003: pin WASM, not WebGPU, and a fixed thread count. Capability
-// detection would make scores device-dependent and break SC-007/FR-016.
+// Pin WASM, not WebGPU, and a fixed thread count. Capability detection would
+// make scores device-dependent, breaking run-to-run reproducibility.
 if (env.backends.onnx.wasm) {
   env.backends.onnx.wasm.numThreads = 1;
 }
@@ -60,7 +58,7 @@ async function loadTokenizer() {
 // zero-width span at the cursor rather than throwing. Interior gaps between
 // matched pieces (whitespace, punctuation) are absorbed into the preceding
 // span, and the first/last spans are forced to [0, text.length) — the same
-// covering-span technique paragraphs.ts uses (R-005).
+// covering-span technique paragraphs.ts uses.
 function computeTokenSpans(text: string, tokens: string[]): TokenSpan[] {
   const lowerText = text.toLowerCase();
   const raw: TokenSpan[] = [];
@@ -91,9 +89,8 @@ function tokenize(id: string, text: string) {
 
 async function loadModel() {
   try {
-    // R-003/D-007: device/dtype are pinned explicitly rather than left to
-    // capability-based defaults, for the same determinism reason as the
-    // WASM thread count above.
+    // device/dtype are pinned explicitly rather than left to capability-based
+    // defaults, for the same determinism reason as the WASM thread count above.
     model = await AutoModel.from_pretrained(MODEL_ID, {
       device: "wasm",
       dtype: "q8",

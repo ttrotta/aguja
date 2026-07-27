@@ -11,8 +11,8 @@ type DocumentInputProps = {
 export function DocumentInput({ value, onChange }: DocumentInputProps) {
   const [refused, setRefused] = useState(false);
 
-  // Nothing is persisted (D-005) — a reload silently discards the pasted
-  // document, so warn while there is anything to lose.
+  // Nothing is persisted — a reload silently discards the pasted document,
+  // so warn while there is anything to lose.
   useEffect(() => {
     if (isEmpty(value)) return;
     const handler = (event: BeforeUnloadEvent) => {

@@ -1,6 +1,6 @@
 /**
  * Assumes both vectors are L2-normalized (the worker's guarantee), so cosine
- * similarity reduces to a dot product (contracts/domain-api.md §3).
+ * similarity reduces to a dot product.
  */
 export function cosineSimilarity(a: Float32Array, b: Float32Array): number {
   if (a.length !== b.length) {

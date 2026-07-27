@@ -6,7 +6,7 @@ import { validateStrategy, type ChunkingStrategy } from "../domain/strategy";
 type StrategyControlsProps = {
   strategy: ChunkingStrategy;
   onChange: (strategy: ChunkingStrategy) => void;
-  /** Gates the "tokens" option — never gated on the (much larger) model (FR-011). */
+  /** Gates the "tokens" option — never gated on the (much larger) model. */
   tokenizerReady: boolean;
 };
 

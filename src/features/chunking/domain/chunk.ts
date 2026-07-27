@@ -7,7 +7,7 @@ export type Chunk = {
   length: number;
 };
 
-/** A maximal region covered by an identical set of chunks (data-model.md). */
+/** A maximal region covered by an identical set of chunks. */
 export type Segment = {
   start: number;
   end: number;

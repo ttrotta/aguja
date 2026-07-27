@@ -2,8 +2,7 @@ import type { Chunk } from "../../chunking/domain/chunk";
 import type { ChunkingStrategy } from "../../chunking/domain/strategy";
 import type { RankedResult } from "../../retrieval/domain/ranking";
 
-// Exactly two named sides, not a list — a list would make a third
-// representable, which FR-022 forbids offering (data-model.md "Comparison").
+// Exactly two named sides, not a list — a list would make a third representable.
 export type Comparison = {
   left: ChunkingStrategy;
   right: ChunkingStrategy;
@@ -23,7 +22,7 @@ export function makeComparison(
 /**
  * The two sides chunk the same document differently, so a single character
  * offset can land in a different chunk — and therefore a different ranked
- * result — on each side (FR-023). Resolved independently per side.
+ * result — on each side. Resolved independently per side.
  */
 export function resultAtOffset(
   chunks: readonly Chunk[],

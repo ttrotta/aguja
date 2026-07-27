@@ -4,7 +4,7 @@ import type { Chunk } from "./chunk";
 // mark a boundary; a match touching either end of the document is leading
 // or trailing whitespace and gets absorbed into the paragraph next to it —
 // this is what keeps chunks[0].start at 0 and the last chunk's end at
-// content.length (invariant 3, R-005) without ever producing an empty chunk.
+// content.length, without ever producing an empty chunk.
 const PARAGRAPH_SEPARATOR = /\n[ \t]*\n[ \t\n]*/g;
 
 export function chunkParagraphs(content: string): Chunk[] {

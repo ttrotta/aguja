@@ -8,9 +8,9 @@ type TokenizerReadiness = "idle" | "loading" | "ready" | "failed";
 
 /**
  * Chunks content under a strategy, live. The three model-free strategies are
- * pure derived state (FR-011, FR-007); only "tokens" needs an effect, since
- * it awaits the worker. Shared by the single-strategy view and both sides of
- * the comparison view (US3) rather than duplicated per caller.
+ * pure derived state; only "tokens" needs an effect, since it awaits the
+ * worker. Shared by the single-strategy view and both sides of the
+ * comparison view rather than duplicated per caller.
  */
 export function useChunks(
   content: string,

@@ -13,9 +13,8 @@ type SummaryImageProps = {
   results: RankedResult[];
 };
 
-// FR-024 asks for "the top-ranked chunks", not the full no-top-N-cut list
-// RankedResults renders — a shareable image has to fit in a reasonable
-// frame, so it is deliberately capped here.
+// A shareable image has to fit in a reasonable frame, unlike RankedResults'
+// full no-top-N-cut list, so it is deliberately capped here.
 const TOP_N = 5;
 const WIDTH = 800;
 const ROW_HEIGHT = 40;
@@ -91,7 +90,7 @@ export function SummaryImage({ strategy, query, chunks, results }: SummaryImageP
   }
 
   // Rendered and downloaded entirely on-device via a Blob object URL — the
-  // image never touches a network request (FR-025, Principle V).
+  // image never touches a network request.
   function handleDownload() {
     const canvas = draw();
     if (!canvas) return;

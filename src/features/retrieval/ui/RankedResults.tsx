@@ -10,9 +10,9 @@ type RankedResultsProps = {
   onSelectIndex: (chunkIndex: number) => void;
 };
 
-// Score is cosine similarity in -1..1, but data-model.md specifies it is
-// *displayed* on 0..1 — the raw sign is a domain-internal detail, not
-// something a reader needs to reason about.
+// Score is cosine similarity in -1..1, but it is *displayed* on 0..1 — the
+// raw sign is a domain-internal detail, not something a reader needs to
+// reason about.
 function toDisplayScore(score: number): number {
   return (score + 1) / 2;
 }

@@ -5,12 +5,12 @@ export type Tokens = { type: "tokens"; size: number };
 
 export type ChunkingStrategy = FixedSize | FixedSizeOverlap | Paragraphs | Tokens;
 
-/** The three strategies that need no tokenizer (research.md R-004). */
+/** The three strategies that need no tokenizer. */
 export type NonTokenStrategy = FixedSize | FixedSizeOverlap | Paragraphs;
 
 type ValidationResult = { valid: true } | { valid: false; reason: string };
 
-/** Rejects invalid parameters before any chunking occurs (FR-009). */
+/** Rejects invalid parameters before any chunking occurs. */
 export function validateStrategy(strategy: ChunkingStrategy): ValidationResult {
   switch (strategy.type) {
     case "fixed-size":

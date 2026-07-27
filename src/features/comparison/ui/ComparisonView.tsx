@@ -26,9 +26,9 @@ function formatScore(score: number): string {
 }
 
 // A single shared passage position drives both columns — selecting a chunk
-// on either side resolves the same offset's chunk on the other (FR-023).
-// The two strategies cut the document differently, so this is never just
-// "the same chunkIndex on both sides".
+// on either side resolves the same offset's chunk on the other. The two
+// strategies cut the document differently, so this is never just "the same
+// chunkIndex on both sides".
 export function ComparisonView({ content, left, right }: ComparisonViewProps) {
   const [selectedOffset, setSelectedOffset] = useState<number | null>(null);
 
