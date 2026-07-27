@@ -159,8 +159,8 @@ top-ranked chunks.
 
 **Independent Test**: spec.md US4 Independent Test.
 
-- [ ] T051 [US4] Implement `SummaryImage.tsx` — canvas render of strategy, parameters, query, top-ranked chunks with scores; generated and downloaded on-device, never uploaded — `src/features/sharing/ui/SummaryImage.tsx` (FR-024, FR-025)
-- [ ] T052 [US4] Wire the share action into `src/app/page.tsx`
+- [X] T051 [US4] Implement `SummaryImage.tsx` — canvas render of strategy, parameters, query, top-ranked chunks with scores; generated and downloaded on-device, never uploaded — `src/features/sharing/ui/SummaryImage.tsx` (FR-024, FR-025) (capped at the top 5 of the no-cut ranked list — FR-024 asks for "the top-ranked chunks", not the full list RankedResults renders; downloads via a Blob object URL and a synthetic `<a download>` click, never a network request; verified by an actual browser download whose resulting PNG was inspected pixel-for-pixel, not just asserted non-empty)
+- [X] T052 [US4] Wire the share action into `src/app/page.tsx` (single-strategy mode only, shown once a query has completed with results — compare mode has no summary image yet, since FR-024 only describes one strategy's result)
 
 **Checkpoint**: All four user stories complete and independently demoable.
 

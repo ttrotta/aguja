@@ -13,6 +13,7 @@ import { QueryInput } from "@/features/retrieval/ui/QueryInput";
 import { RankedResults } from "@/features/retrieval/ui/RankedResults";
 import { rankChunks, type RankedResult } from "@/features/retrieval/domain";
 import { ComparisonView } from "@/features/comparison/ui/ComparisonView";
+import { SummaryImage } from "@/features/sharing/ui/SummaryImage";
 
 type QueryState = {
   status: "idle" | "running" | "error";
@@ -263,12 +264,22 @@ export default function Home() {
               }}
             />
           ) : (
-            <RankedResults
-              results={queryState.results}
-              chunks={chunks}
-              selectedIndex={selectedChunkIndex}
-              onSelectIndex={setSelectedChunkIndex}
-            />
+            <>
+              <RankedResults
+                results={queryState.results}
+                chunks={chunks}
+                selectedIndex={selectedChunkIndex}
+                onSelectIndex={setSelectedChunkIndex}
+              />
+              {queryState.status === "idle" && queryState.results.length > 0 && (
+                <SummaryImage
+                  strategy={strategy}
+                  query={queryState.query}
+                  chunks={chunks}
+                  results={queryState.results}
+                />
+              )}
+            </>
           )}
         </>
       )}
