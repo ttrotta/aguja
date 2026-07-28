@@ -262,3 +262,84 @@ one, and a CI runner with less CPU/bandwidth than a developer's desktop could st
 budget missed for reasons unrelated to the app. If that happens, the honest fix is a
 resource-aware `workers` value (or a separate low-concurrency project just for these two specs),
 not a larger millisecond threshold — the number in the spec is the number to defend.
+
+---
+
+## D-010 — Open v2 as a tool suite, bounded by what embeddings alone can answer
+
+**Date**: 2026-07-28 · **Status**: Accepted
+
+**Context.** v1 shipped as a single debugger answering one question: *why doesn't my retrieval
+find this passage?* The landing page's tool dial already reserves two unnamed slots, and the
+stated direction for the project is tools for people who build retrieval systems — not one tool
+that happens to have several views.
+
+That raised the real question: *which* tools. The obvious candidates from the RAG ecosystem —
+answer generation, groundedness and faithfulness scoring, automatic query rewriting,
+cross-encoder reranking — all require generative or second-model inference. Principle V forbids
+a server and an API key, and the only model loaded is `all-MiniLM-L6-v2`, which produces
+embeddings and nothing else. Shipping any of them means either breaking Principle V or
+downloading a second, far larger model on first visit, which D-006 already rejected on the
+grounds of first-visit weight.
+
+Filtering the candidates by what embeddings and the tokenizer can actually compute left a
+smaller, honest set. Two were selected: analysing how a chunk's rank moves across several
+phrasings of the same question, and mapping near-duplicate chunks against each other.
+
+Two further candidates were considered and not taken. A *top-k threshold explorer* is a view
+over data the existing ranked list already computes, not a separate tool. A *token budget*
+planner would report counts from MiniLM's WordPiece tokenizer, which does not match the BPE
+tokenizers of the models users actually send context to; presenting those numbers as a context
+budget would be precisely the kind of quiet inaccuracy this project exists to expose. A
+*strategy sweep* across a range of chunk sizes remains out: it is "comparing more than two
+strategies at once", which is already an explicit Out entry.
+
+**Decision.** Open v2. `/tool` becomes a suite navigated by a sidebar, with the existing
+debugger at `/tool/chunks` and pairwise comparison promoted from a checkbox to its own route.
+Two tools are added: **Query Sensitivity**, which ranks chunks across several phrasings of one
+question and reports each chunk's rank spread, and **Redundancy Map**, which surfaces chunk
+pairs whose similarity exceeds a measured threshold.
+
+Tools are sibling routes under a shared layout. That layout owns the pasted document, the
+embedder, and a cache of chunk embeddings keyed by chunk text, all for the lifetime of the
+session only.
+
+**Why.** Sharing the embedder across tools is a requirement, not an optimization: it holds a
+worker and a roughly 25 MB first-visit download, and mounting one per tool would either
+re-download the model or run several workers against the same text. Sibling routes under one
+layout are what makes a single shared instance natural in the App Router, and they keep each
+tool independently addressable, which a state-switched single page would not.
+
+The two selected tools were chosen because each exposes a failure that is currently invisible
+and that the existing domain primitives already support. Phrasing brittleness is the failure
+where retrieval passes the author's own test query and then misses in production because a real
+user asked differently. Redundancy is the failure where a top-k of five returns two distinct
+facts and three restatements, silently spending the context window that the retrieval existed
+to fill.
+
+The rejected candidates were rejected on the same standard, not on effort. A tool that cannot
+be honest about its own numbers is worse than no tool, given Product Principle 2.
+
+**Consequences.** The Technology Constraints scope section moves beyond v1, which is a MINOR
+constitution amendment (1.0.0 → 1.1.0). The generative-inference exclusion becomes explicit
+there rather than implied by Principle V, so a future contributor does not have to re-derive it.
+
+The compare-mode checkbox is removed in favour of a route. Comparing more than two strategies at
+once remains out, so the sidebar must not grow into a workaround for it.
+
+The redundancy computation is O(n²) in chunk count: a 50,000-character document at small chunk
+sizes reaches several million pairs. It runs in the worker behind an explicit, surfaced cap —
+never a silent truncation — and the interface presents ranked pairs, never a full matrix.
+
+The near-duplicate threshold is a real number that must be measured against this model rather
+than assumed; MiniLM's cosine similarities are compressed enough that unrelated English text
+still scores well above zero. The value chosen, and the measurement behind it, belong in the
+specification.
+
+The determinism contract extends unchanged: identical inputs produce identical output, ties
+break by ascending chunk index, and pair ordering is fully specified rather than left to sort
+stability.
+
+Interface language unifies to English across the whole application, resolving a mix that had
+accumulated between the tool and its newer chrome.
+

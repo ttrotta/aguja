@@ -1,6 +1,38 @@
 <!--
-Sync Impact Report
-==================
+Sync Impact Report — 1.1.0 (2026-07-28)
+=======================================
+Version change: 1.0.0 → 1.1.0
+Bump rationale: MINOR. Existing guidance materially expanded — the Technology
+                Constraints scope section now covers v2 alongside v1, and states
+                the generative-inference exclusion outright instead of leaving it
+                to be re-derived from Principle V. No principle was added,
+                removed, or redefined.
+
+Sections changed:
+  - Technology Constraints — stack line no longer scoped to v1; scope list gains
+    an "Added in v2" entry and folds "Out of v1" into a version-independent
+    "Out", now including tools that need generative or second-model inference.
+
+Reasoning recorded in: docs/decisions.md D-010 (required by the amendment
+procedure, since Technology Constraints was touched)
+
+Template consistency:
+  ✅ .specify/templates/plan-template.md   — Constitution Check gate reads this
+                                             file at plan time; no edit needed
+  ✅ .specify/templates/spec-template.md   — unaffected by a scope-list change
+  ✅ .specify/templates/tasks-template.md  — unaffected
+  ✅ CLAUDE.md                             — refreshed in the same change: scope
+                                             list realigned to this section and
+                                             given D-010's generative-inference
+                                             exclusion; project-state section
+                                             corrected (it still claimed no
+                                             application code existed, which
+                                             predated v1 shipping); real pnpm
+                                             commands and the 002 spec added
+
+Deferred TODOs: none
+
+---- Previous report (1.0.0) ----
 Version change: (template, unversioned) → 1.0.0
 Bump rationale: Initial ratification. First concrete constitution replacing the
                 unfilled Spec Kit template.
@@ -141,8 +173,8 @@ assertions possible.
 
 ## Technology Constraints
 
-The stack is fixed for v1 and MUST NOT be substituted without an amendment and a new
-entry in `docs/decisions.md`:
+The stack is fixed and MUST NOT be substituted without an amendment and a new entry in
+`docs/decisions.md`:
 
 - **Framework**: Next.js (App Router) with TypeScript
 - **Styling**: Tailwind CSS
@@ -158,13 +190,19 @@ otherwise.
 The scope boundaries below are decisions, not a backlog. Implementing anything in the
 **Out** list requires an amendment:
 
-- **In v1**: pasting plain text; four chunking strategies (fixed size by characters,
-  fixed size with overlap, by paragraphs, by tokenization units); querying; ranked
-  results with scores and positions; pairwise strategy comparison; a shareable summary
-  image.
-- **Out of v1**: file upload of any kind (PDF, Word, Markdown); semantic chunking; saved
+- **In v1** (shipped): pasting plain text; four chunking strategies (fixed size by
+  characters, fixed size with overlap, by paragraphs, by tokenization units); querying;
+  ranked results with scores and positions; pairwise strategy comparison; a shareable
+  summary image.
+- **Added in v2** (D-010): a tool suite under `/tool`, navigated by a sidebar, whose
+  tools share one pasted document and one embedder instance for the lifetime of a
+  session; query-sensitivity analysis across several phrasings of one question;
+  a near-duplicate map over chunk embeddings.
+- **Out**: file upload of any kind (PDF, Word, Markdown); semantic chunking; saved
   sessions; user accounts; comparing more than two strategies at once; persistence
-  across page reloads.
+  across page reloads; and any tool requiring generative or second-model inference —
+  answer generation, groundedness or faithfulness scoring, LLM query rewriting, or
+  cross-encoder reranking — which Principle V excludes for as long as it stands.
 
 Chunk visualization is priority P1 and MUST remain independently shippable. If the
 budget tightens, retrieval is what gets cut — never the reverse, and never by degrading
@@ -212,4 +250,4 @@ that was rejected — and an unjustifiable violation blocks the plan.
 `CLAUDE.md` carries runtime guidance for AI agents working in this repository and MUST
 be kept consistent with this document.
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-25 | **Last Amended**: 2026-07-25
+**Version**: 1.1.0 | **Ratified**: 2026-07-25 | **Last Amended**: 2026-07-28

@@ -3,26 +3,37 @@
 Aguja is a debugger for retrieval systems: paste a document, see how it is split into chunks,
 run a query, see which chunks come back with scores and ranks.
 
-**No application code exists yet.** There is no `package.json`, no build, no test runner, no
-`src/`. Do not invent commands — when scaffolding, the stack below is what to set up.
+**v1 is built and shipped.** The application lives under `src/`, with the landing page at `/` and
+the debugger at `/tool`. Features are `chunking`, `retrieval`, `comparison`, `documents`, and
+`sharing`.
 
-What does exist, and should be read before doing anything:
+**v2 is specified but not built.** `specs/002-rag-tool-suite/spec.md` turns `/tool` into a suite
+of tools sharing one document and one loaded model, and adds two analyses: query sensitivity
+across several phrasings, and a near-duplicate map over chunks. Nothing in it exists in `src/`
+yet; `plan.md` is the next artifact for it.
+
+Read before doing anything:
 
 | File | Authority |
 |---|---|
-| `.specify/memory/constitution.md` | Binding principles. Wins over every other artifact. |
+| `.specify/memory/constitution.md` | Binding principles. Wins over every other artifact. Currently 1.1.0. |
 | `specs/001-rag-chunking-debugger/spec.md` | What v1 does — user stories P1–P4, FR-001…FR-026, SC-001…SC-010 |
-| `docs/decisions.md` | Why it is built this way. Append-only, D-001…D-006. |
+| `specs/002-rag-tool-suite/spec.md` | What v2 adds — user stories P1–P3, FR-027…FR-051, SC-011…SC-018 |
+| `docs/decisions.md` | Why it is built this way. Append-only, D-001…D-010. |
+| `PRODUCT.md` · `DESIGN.md` | Product truth and the visual system. DESIGN.md wins on visual decisions. |
 
-Spec Kit is installed. The flow is constitution → specify → **plan** → tasks → implement; the
-first two are done, `plan.md` is the next artifact. Skills live in `.claude/skills/speckit-*`.
+Spec Kit is installed; skills live in `.claude/skills/speckit-*`. The flow is constitution →
+specify → plan → tasks → implement.
+
+Commands: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test` (Vitest),
+`pnpm test:domain`, `pnpm test:e2e` (Playwright). Do not invent others.
 
 ## Stack
 
 Next.js (App Router), TypeScript, Tailwind CSS, pnpm. Transformers.js running
 `Xenova/all-MiniLM-L6-v2` quantized for in-browser embeddings. Vitest for unit tests, Playwright
-for end-to-end. Deployed on Vercel. Fixed for v1 — substituting anything here needs a
-constitution amendment plus a new decision entry.
+for end-to-end. Deployed on Vercel. Fixed — substituting anything here needs a constitution
+amendment plus a new decision entry.
 
 ## Architecture rules (from D-004)
 
@@ -47,10 +58,15 @@ These were chosen with reasons recorded in `docs/decisions.md`. Do not "fix" the
 - **Paste-only input, session-scoped state** (D-005). No file upload (PDF/Word/Markdown), no
   persistence across reloads; the spec requires warning the user before work is lost. The
   document is modeled as content plus length, not as a file.
-- **Out of v1 scope:** semantic chunking, saved sessions, user accounts, comparing more than two
-  strategies at once.
-- **P1 is chunk visualization**, which ships alone if the 6-day budget tightens. Retrieval is the
-  half that makes it a debugger rather than an illustration (D-003), but it is second.
+- **Out of scope, permanently unless amended:** file upload of any kind, semantic chunking, saved
+  sessions, user accounts, comparing more than two strategies at once, persistence across
+  reloads.
+- **No tool may require generative or second-model inference** (D-010). Answer generation,
+  groundedness or faithfulness scoring, LLM query rewriting, and cross-encoder reranking are all
+  excluded for as long as Principle V stands — not deferred, excluded. Everything ships from the
+  embeddings and tokenizer the one loaded model already provides.
+- **Chunk visualization must stay independently shippable.** It was v1's P1 and both halves did
+  ship; if scope ever tightens again, retrieval is what gets cut, never the reverse (D-003).
 - **English-only, by choice** (D-006). The model was picked for a small first-visit download, not
   for quality or language coverage. Non-English scores are not trustworthy and the UI must say so.
 
