@@ -6,10 +6,10 @@ type Step = {
 };
 
 const STEPS: Step[] = [
-  { label: "1 — Pegás", text: "Texto plano, sin login, nunca sale del navegador.", align: "top", leftPct: 8 },
-  { label: "2 — Cortás", text: "4 estrategias de chunking, parámetros en vivo.", align: "bottom", leftPct: 36 },
-  { label: "3 — Preguntás", text: "Cada chunk rankeado por score, sin recortar a un top-N.", align: "top", leftPct: 64 },
-  { label: "4 — Comparás", text: "Dos estrategias lado a lado, o exportás el hallazgo.", align: "bottom", leftPct: 90 },
+  { label: "1 — Paste", text: "Plain text, no login, never leaves the browser.", align: "top", leftPct: 8 },
+  { label: "2 — Chunk", text: "4 chunking strategies, live parameters.", align: "bottom", leftPct: 36 },
+  { label: "3 — Query", text: "Every chunk ranked by score, no top-N cutoff.", align: "top", leftPct: 64 },
+  { label: "4 — Compare", text: "Two strategies side by side, or export the finding.", align: "bottom", leftPct: 90 },
 ];
 
 function MiniVisual({ index }: { index: number }) {
@@ -61,10 +61,10 @@ export function ProductWalkthrough() {
     <section className="mx-auto w-full max-w-6xl px-6 py-24">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="font-display text-4xl font-black text-text md:text-5xl">
-          Un hilo, de punta a punta.
+          One thread, start to finish.
         </h2>
         <p className="mt-4 text-lg text-text-muted">
-          Cuatro pasos, un solo hilo violeta corriendo por debajo de todos ellos.
+          Four steps, one violet thread running underneath all of them.
         </p>
       </div>
 

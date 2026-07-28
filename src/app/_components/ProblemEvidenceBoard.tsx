@@ -31,32 +31,32 @@ export function ProblemEvidenceBoard() {
     <section className="mx-auto w-full max-w-6xl px-6 py-24">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="font-display text-4xl font-black text-text md:text-5xl">
-          Los fallos de retrieval no avisan.
+          Retrieval failures don&rsquo;t announce themselves.
         </h2>
         <p className="mt-4 text-lg text-text-muted">
-          El passage está en el documento. La búsqueda no lo trae. Y nada te dice por qué — hasta
-          que ves el corte.
+          The passage is in the document. The search doesn&rsquo;t bring it back. And nothing
+          tells you why — until you see the cut.
         </p>
       </div>
 
       <div className="relative mx-auto mt-20 max-w-6xl">
         <div className="hidden md:absolute md:top-4 md:left-4 md:block md:w-52">
           <Note className="-rotate-2">
-            El corte cae acá, en medio de la frase — la mitad de &ldquo;regardless of the original
-            payment method&rdquo; queda en el chunk siguiente.
+            The cut falls right here, mid-sentence — half of &ldquo;regardless of the original
+            payment method&rdquo; ends up in the next chunk.
           </Note>
         </div>
 
         <div className="hidden md:absolute md:top-44 md:right-4 md:block md:w-52">
           <Note className="rotate-1">
-            Este chunk ya mide ~1.100 caracteres — el modelo lo trunca cerca de los 1.000 y la
-            aclaración de aduana nunca se embeddea.
+            This chunk is already ~1,100 characters — the model truncates around 1,000, so the
+            customs note never gets embedded.
           </Note>
         </div>
 
         <div className="rounded-lg border border-text/10 bg-panel-inset-bg p-6 md:mx-auto md:max-w-xl md:p-8">
           <p className="mb-3 text-xs tracking-wide text-text-muted">
-            documento de ejemplo (sintético) — política de reembolsos
+            example document (synthetic) — refund policy
           </p>
           <p className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-text/90">
             {DOCUMENT_EXCERPT}
@@ -65,8 +65,8 @@ export function ProblemEvidenceBoard() {
 
         <div className="mt-6 flex justify-center md:mt-8">
           <Note className="rotate-2 md:w-72">
-            Sin línea en blanco entre &ldquo;4.2 Refunds&rdquo; y &ldquo;4.3&rdquo; → &ldquo;por
-            paragraphs&rdquo; colapsa las dos secciones en un solo chunk gigante.
+            No blank line between &ldquo;4.2 Refunds&rdquo; and &ldquo;4.3&rdquo; → paragraph
+            chunking collapses both sections into one giant chunk.
           </Note>
         </div>
       </div>

@@ -225,15 +225,16 @@ selected) reskinned to the new tokens rather than reinvented, since it was alrea
 solve the "see where the cuts land" requirement.
 
 ### Tool Dial (signature component, landing hero)
-A circular dial replacing a static comparison card: six nodes on a ring (four real capabilities —
-compare, boundaries, ranking, export — plus two generic "Próximamente" slots that never carry a
-specific unannounced feature name), the active tool's mocked preview shown in the ring's center.
-Navigable three ways — click a node, drag anywhere on the ring (nearest-angle selection, not
-physics), or arrow keys when focused — and slow-auto-advances only until the first interaction,
-after which it stops permanently and never resumes. Skips auto-advance entirely under
-`prefers-reduced-motion`. The active node fills Hilo Violeta; "Próximamente" nodes render with a
-dashed border and no individual label (the label only appears once a node is actually active), so
-an unnamed future slot never reads as more committed than it is.
+A circular dial replacing a static comparison card: six nodes on a ring (the four shipped tools —
+Chunk Inspector, Strategy Comparison, Query Sensitivity, Confusable Chunks — plus two generic
+"Coming soon" slots that never carry a specific unannounced feature name), the active tool's
+mocked preview shown in the ring's center. Navigable three ways — click a node, drag anywhere on
+the ring (nearest-angle selection, not physics), or arrow keys when focused — and
+slow-auto-advances only until the first interaction, after which it stops permanently and never
+resumes. Skips auto-advance entirely under `prefers-reduced-motion`. The active node fills Hilo
+Violeta; "Coming soon" nodes render with a dashed border and no individual label (the label only
+appears once a node is actually active), so an unnamed future slot never reads as more committed
+than it is.
 
 ## Do's and Don'ts
 

@@ -8,17 +8,16 @@ type Tool = {
   kind: "real" | "soon";
 };
 
-// Four capabilities the app actually has today, in the order the brief
-// asked to lead with, plus generic unnamed slots — a visible "there's more
-// coming" without promising a specific roadmap item PRODUCT.md hasn't
-// confirmed.
+// The four tools the app actually ships today, plus generic unnamed slots —
+// a visible "there's more coming" without promising a specific roadmap item
+// PRODUCT.md hasn't confirmed.
 const TOOLS: Tool[] = [
-  { id: "compare", label: "Comparar chunks", kind: "real" },
-  { id: "boundaries", label: "Ver los cortes", kind: "real" },
-  { id: "ranking", label: "Rankear por score", kind: "real" },
-  { id: "export", label: "Exportar hallazgo", kind: "real" },
-  { id: "soon-1", label: "Próximamente", kind: "soon" },
-  { id: "soon-2", label: "Próximamente", kind: "soon" },
+  { id: "chunks", label: "Chunk Inspector", kind: "real" },
+  { id: "compare", label: "Strategy Comparison", kind: "real" },
+  { id: "queries", label: "Query Sensitivity", kind: "real" },
+  { id: "confusable", label: "Confusable Chunks", kind: "real" },
+  { id: "soon-1", label: "Coming soon", kind: "soon" },
+  { id: "soon-2", label: "Coming soon", kind: "soon" },
 ];
 
 const AUTO_ADVANCE_MS = 3500;
@@ -84,19 +83,12 @@ function RankingPreview() {
   );
 }
 
-function ExportPreview() {
+function ConfusablePreview() {
   return (
-    <div className="flex flex-col items-center gap-2">
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-        <path
-          d="M14 4v14m0 0-5-5m5 5 5-5M6 22h16"
-          stroke="var(--color-violet)"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <span className="text-[10px] text-text-muted">aguja-summary.png</span>
+    <div className="flex items-center gap-2">
+      <span className="h-1 w-10 rounded-full bg-violet" />
+      <span className="text-[11px] text-text-muted">&asymp;</span>
+      <span className="h-1 w-10 rounded-full bg-violet" />
     </div>
   );
 }
@@ -105,7 +97,7 @@ function SoonPreview() {
   return (
     <div className="flex flex-col items-center gap-2">
       <span className="h-8 w-8 rounded-full border border-dashed border-text/25" />
-      <span className="text-[10px] text-text-muted">Próximamente</span>
+      <span className="text-[10px] text-text-muted">Coming soon</span>
     </div>
   );
 }
@@ -113,14 +105,14 @@ function SoonPreview() {
 function ToolPreview({ tool }: { tool: Tool }) {
   if (tool.kind === "soon") return <SoonPreview />;
   switch (tool.id) {
+    case "chunks":
+      return <BoundariesPreview />;
     case "compare":
       return <ComparePreview />;
-    case "boundaries":
-      return <BoundariesPreview />;
-    case "ranking":
+    case "queries":
       return <RankingPreview />;
-    case "export":
-      return <ExportPreview />;
+    case "confusable":
+      return <ConfusablePreview />;
     default:
       return null;
   }
@@ -163,7 +155,7 @@ export function ToolDial() {
     <div className="flex flex-col items-center gap-4">
       <div
         role="listbox"
-        aria-label="Herramientas de Aguja"
+        aria-label="Aguja tools"
         tabIndex={0}
         onKeyDown={handleKeyDown}
         className="flex h-[520px] w-[520px] shrink-0 flex-col gap-3 rounded-3xl border border-text/10 bg-panel-bg/40 p-4 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet focus-visible:outline-offset-4"
@@ -216,7 +208,7 @@ export function ToolDial() {
           })}
         </div>
       </div>
-      <p className="text-xs text-text-muted">Elegí una herramienta, o usá las flechas del teclado.</p>
+      <p className="text-xs text-text-muted">Choose a tool, or use the arrow keys.</p>
     </div>
   );
 }

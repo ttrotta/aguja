@@ -63,8 +63,8 @@ export function LandingHero() {
           <p
             className="mt-6 max-w-xl text-balance text-[1.25rem] text-text-muted tracking-wide md:mt-8 md:text-left"
           >
-            Un debugger para retrieval. Pegá un documento, mirá dónde caen los cortes, y por fin
-            entendé por qué esa frase no aparece.
+            A debugger for retrieval. Paste a document, see where the cuts fall, and finally
+            understand why that sentence doesn&rsquo;t show up.
           </p>
         </div>
         <BigNeedle />
