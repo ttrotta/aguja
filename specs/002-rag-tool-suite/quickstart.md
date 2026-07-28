@@ -102,9 +102,11 @@ in D-009; do not raise it to make this faster.
 
 ## Owed before this is done
 
-[research.md](./research.md) leaves three items for implementation, and this feature is not
-complete while any is open:
+[research.md](./research.md) left three items for implementation — all three are now resolved:
 
-1. Confirm the similarity threshold in-browser on the `wasm` provider — measurement ran on `cpu`.
-2. Choose the chunk cap from real in-browser embedding throughput, not from pair-comparison cost.
-3. Choose and document the lexical-overlap measure.
+1. ~~Confirm the similarity threshold in-browser on the `wasm` provider~~ — confirmed within
+   ~0.01 of the `cpu` figures (T025).
+2. ~~Choose the chunk cap from real in-browser embedding throughput~~ — `CHUNK_CAP = 800`,
+   measured against a real throughput cliff around 900-950 chunks, not from pair-comparison cost
+   (T026).
+3. ~~Choose and document the lexical-overlap measure~~ — token-set Jaccard, documented in D-012.
