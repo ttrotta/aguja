@@ -2,6 +2,10 @@
 .claude/settings.local.json
 .specify/feature.json
 
+# Impeccable live-mode journals — local recovery state, not project config
+.impeccable/live/sessions/
+.impeccable/live/accept-receipts/
+
 # Dependencies
 node_modules/
 .pnpm-store/
