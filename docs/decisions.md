@@ -343,3 +343,62 @@ stability.
 Interface language unifies to English across the whole application, resolving a mix that had
 accumulated between the tool and its newer chrome.
 
+---
+
+## D-011 — Report confusable chunks, not duplicates, because cosine cannot tell them apart
+
+**Date**: 2026-07-28 · **Status**: Accepted
+
+**Context.** D-010 specified a redundancy map: surface chunk pairs whose embeddings exceed a
+near-duplicate similarity threshold, so a user can see whether their top-k is spending slots on
+restatements of one fact. FR-045 required that the threshold be measured against
+`all-MiniLM-L6-v2` rather than assumed. Measuring it produced a result that invalidated the
+design rather than calibrating it.
+
+Cosine similarity between chunks that genuinely share text is lower than expected. Adjacent
+chunks produced by 75%-overlap chunking — three quarters of their characters literally identical
+— score 0.643 to 0.760. Paraphrases of one fact score 0.567 to 0.742.
+
+Chunks that state opposite versions of one fact score far higher:
+
+| Pair | Cosine |
+|---|---|
+| "Free shipping applies to orders over $50." / "…over $100." | 0.9300 |
+| "The API rate limit is 1000 requests per hour." / "…100 requests…" | 0.9567 |
+| "Sessions expire after 24 hours of inactivity." / "…after 15 minutes…" | 0.9375 |
+| "You must enable two-factor authentication." / "You must **not** enable…" | 0.9545 |
+
+Negation barely registers: `must` and `must not` differ by 0.045. Every contradiction outscores
+every true duplicate, so no threshold separates them. A tool ranking pairs by similarity and
+calling the top ones near-duplicates would put contradictions first and describe them as
+identical content — false in precisely the cases a retrieval debugger exists to catch.
+
+**Decision.** Reframe the tool. It surfaces **confusable chunks** — pairs the retriever cannot
+tell apart — rather than duplicates, and reports lexical overlap alongside cosine similarity. High
+similarity with high shared wording is duplication; high similarity with little shared wording is
+confusion. The interface may not call a pair duplicated on similarity alone (FR-045). The sidebar
+entry is "Confusable Chunks".
+
+**Why.** The measurement did not reveal a bad threshold, it revealed that similarity alone does
+not carry the meaning the original framing assigned to it. Shipping the original framing would
+have violated Product Principle 2 in the sharpest possible way: a corpus containing both "you must
+enable 2FA" and "you must not enable 2FA" is a catastrophic retrieval failure, and the tool would
+have reported it as harmless repetition.
+
+Under the new framing the same computation becomes more valuable rather than less. Two chunks at
+0.95 that a reader would never confuse mean the retriever's judgement between them is close to
+arbitrary — invisible today, and exactly what this project exists to expose. Lexical overlap is
+the cheapest signal that separates the two cases: deterministic, framework-free, and computable
+from text already in hand without a second model.
+
+**Consequences.** FR-043 through FR-051 and User Story 3 are rewritten in the v2 specification;
+determinism requirements move to FR-052 and FR-053. The tool gains a second reported measure per
+pair, so its results carry two numbers rather than one.
+
+The default threshold must be chosen against the confusable framing, not the duplicate one, and
+sits below the contradiction band rather than above the duplication band.
+
+A separate measurement corrected the cost risk recorded in D-010. Comparing every pair is roughly
+1 second for 2,000 chunks and 2.4 seconds for 3,000, while embedding that many chunks takes
+minutes. The chunk cap therefore exists to bound embedding work, not pair comparison; D-010's
+framing of the O(n²) comparison as the performance risk was wrong.
