@@ -1,26 +1,152 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --color-page-bg: #0e0b14;
+  --color-panel-bg: #17121f;
+  --color-panel-inset-bg: #1d1728;
+  --color-text: #f2eff5;
+  --color-text-muted: rgba(242, 239, 245, 0.62);
+  --color-violet: #a970ff;
+  --color-violet-deep: #7c3aed;
+  --color-warning: #ff7a66;
+  --color-violet-glow: rgba(169, 112, 255, 0.45);
+}
+
+:root.light {
+  color-scheme: light;
+  --color-page-bg: #e9e2d3;
+  --color-panel-bg: #f3eee3;
+  --color-panel-inset-bg: #ebe4d5;
+  --color-text: #211d1b;
+  --color-text-muted: rgba(33, 29, 27, 0.62);
+  --color-violet: #7a3fc2;
+  --color-violet-deep: #6b3fa0;
+  --color-warning: #a83c32;
+  --color-violet-glow: rgba(122, 63, 194, 0.35);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-page-bg: var(--color-page-bg);
+  --color-panel-bg: var(--color-panel-bg);
+  --color-panel-inset-bg: var(--color-panel-inset-bg);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-violet: var(--color-violet);
+  --color-violet-deep: var(--color-violet-deep);
+  --color-warning: var(--color-warning);
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-jost);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-page-bg);
+  color: var(--color-text);
+  font-family: var(--font-jost), system-ui, sans-serif;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* The needle "stitches in" — an authored motion moment tied to selection,
+   never a scroll/hover flourish. */
+@keyframes stitch-in {
+  from {
+    stroke-dashoffset: 48;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.needle-glyph path,
+.needle-glyph ellipse {
+  stroke-dasharray: 48;
+  animation: stitch-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Glow is earned by the thread/needle motif and the active selection only —
+   see DESIGN.md's Earned Glow Rule. Never applied to buttons/cards at rest. */
+.thread-glow {
+  filter: drop-shadow(0 0 24px var(--color-violet-glow));
+}
+
+@keyframes thread-drift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(-10px, 14px) rotate(-3deg);
+  }
+  66% {
+    transform: translate(8px, -10px) rotate(2deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+.thread-drift {
+  animation: thread-drift 10s ease-in-out infinite;
+}
+
+@keyframes needle-sway {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(-2deg);
+  }
+}
+
+.needle-sway {
+  animation: needle-sway 7s ease-in-out infinite;
+  transform-origin: 50% 85%;
+}
+
+@keyframes scroll-cue-dot {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  71% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.scroll-cue-dot {
+  animation: scroll-cue-dot 1.6s ease-in-out infinite;
+}
+
+/* Bounded preview panes (the document preview, the results list) scroll on
+   overflow but shouldn't show a scrollbar track — the fixed height is
+   already the visual cue that there's more below. */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thread-drift,
+  .needle-sway,
+  .scroll-cue-dot {
+    animation: none !important;
+  }
 }
