@@ -42,26 +42,33 @@ function findConfusablePairs(
   chunks: readonly Chunk[],
   embeddings: readonly Embedding[],
   threshold: number,
-  maxChunks: number,
+  chunksTotal: number,
 ): ConfusabilityRun;
 ```
 
-Compares every chunk pair and returns those at or above `threshold`, with the counts the interface
-needs to disclose what was and was not compared.
+Compares every chunk pair in `chunks` and returns those at or above `threshold`, with the counts
+the interface needs to disclose what was and was not compared.
+
+`chunks`/`embeddings` are already the capped set — the caller truncates to the cap *before*
+embedding, because the cap exists to bound embedding cost, not comparison cost (research.md
+Finding 2: comparison is cheap, embedding is not). This function only ever sees what was actually
+embedded; it does not do the truncating itself.
 
 **Preconditions**
 
 - `chunks.length === embeddings.length`. Mismatch throws.
 - `threshold` on `[-1, 1]`, the raw cosine range. Converting for display is the UI's job, so the
   domain never carries two scales.
-- `maxChunks >= 0`.
+- `chunksTotal >= chunks.length`. The document's real chunk count, for disclosure only — it plays
+  no part in which pairs are compared.
 
 **Postconditions**
 
-- Only the first `min(chunks.length, maxChunks)` chunks are compared. Truncation is by position,
-  not by sampling, so a rerun compares the same set (FR-052).
-- `chunksCompared` and `chunksTotal` are both returned, always — the cap disclosure is structural,
-  not something the UI must remember (FR-049).
+- Every chunk in `chunks` is compared against every other; nothing is truncated internally
+  (truncation already happened, positionally, before this function was called — so a rerun over
+  the same capped input compares the same set, FR-052).
+- `chunksCompared` equals `chunks.length`. `chunksTotal` is the value passed in, returned
+  unchanged — the cap disclosure is structural, not something the UI must remember (FR-049).
 - Every pair satisfies `firstChunkIndex < secondChunkIndex`; each unordered pair appears exactly
   once; no self-pairs.
 - `similarity >= threshold` for every returned pair.
@@ -106,7 +113,7 @@ Written and observed failing before implementation.
 | Pair exactly at threshold | Included — the boundary is inclusive |
 | Two pairs with equal similarity | Lower `firstChunkIndex` first |
 | Equal similarity and equal first index | Lower `secondChunkIndex` first |
-| `chunks.length` exceeds `maxChunks` | `chunksCompared === maxChunks`, `chunksTotal` unchanged, only in-range pairs returned |
+| `chunksTotal` exceeds `chunks.length` (caller pre-truncated) | `chunksCompared === chunks.length`, `chunksTotal` returned unchanged, no pair references an index outside `chunks` |
 | Zero chunks | Empty `pairs`, `chunksTotal === 0`, no throw |
 | One chunk | Empty `pairs`, `chunksTotal === 1`, no throw |
 | Nothing meets threshold | Empty `pairs`, `chunksTotal >= 2` |

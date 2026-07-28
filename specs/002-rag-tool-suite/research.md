@@ -135,6 +135,43 @@ comparison, progressive rendering of pairs — for no gain.
 throughput on the target device. A cap in the low thousands leaves pair comparison comfortably
 under 2 seconds, so the cap can be set by embedding cost alone.
 
+### Real embedding throughput and the final cap (T026)
+
+The first implementation didn't actually apply the consequence above: `findConfusablePairs`
+required `chunks.length === embeddings.length`, so the caller embedded every chunk the document
+produced and only capped the *comparison* step afterward — exactly the bottleneck Finding 2 showed
+was already cheap. A document large enough to exceed the cap would still pay full, unbounded
+embedding cost before the "cap reached" notice ever appeared, which defeats FR-050. Fixed by moving
+the truncation earlier: the caller now slices `chunks` to the cap *before* calling
+`getOrEmbedChunks`, and `findConfusablePairs` takes the document's true total as a separate
+`chunksTotal` parameter instead of deriving it from array length (see
+[contracts/confusability.md](./contracts/confusability.md)).
+
+With that fixed, chunk counts were measured in-browser (`wasm`, same worker and model as
+production) via a fixed-size document (~47,500 characters) with varying chunk sizes, each measured
+in its own isolated browser session (running several sizes back-to-back in one session was tried
+first and produced confounded numbers — later runs in a warm session measured 2-3x slower than an
+identical size measured alone):
+
+| Chunks | Full embed+compare time |
+|---|---|
+| ~500 | 5.5 s |
+| ~750 | 5.2 s |
+| ~805 | 5.2 s |
+| ~896 | 5.3 s |
+| ~950 | 12.4 s |
+| ~990 | 14.0 s |
+| ~1,484 | 5.5 s (measured alone) / ~13 s (measured after other runs in the same session) |
+
+There is a sharp cliff between ~896 and ~950 chunks, not a smooth curve — time roughly doubles
+across a ~6% increase in chunk count. This looks like a threshold internal to the WASM/ONNX runtime
+(likely a memory-growth or batching-strategy boundary) rather than a property of the embedding
+workload itself, but the practical consequence is the same either way: a cap has to sit clearly
+below that cliff, not just "in the low thousands" as the comparison-only numbers suggested.
+
+**Decision.** `CHUNK_CAP = 800` — comfortably under the ~896-950 cliff, measured consistently
+around 5.2 seconds for a full-cap embed, matching "a few seconds" with margin for slower hardware.
+
 ## Finding 3 — Normalized vectors simplify the domain
 
 The worker L2-normalizes every embedding, and `cosineSimilarity` already relies on this to reduce
@@ -148,8 +185,9 @@ in Finding 2's numbers, which were measured on the upper triangle already.
    runs on `wasm`. Re-run two or three of the pairs above through the real worker and confirm they
    land in the same bands. If they diverge by more than ~0.02, the threshold is re-derived from the
    in-browser numbers and this document is updated.
-2. **Choose the chunk cap against real embedding throughput**, measured in-browser on the target
-   device, not from the pair-comparison figures above.
+2. ~~Choose the chunk cap against real embedding throughput~~ **Resolved**: `CHUNK_CAP = 800`. See
+   "Real embedding throughput and the final cap (T026)" above — this also corrected a bug where the
+   cap bounded comparison, not embedding, which was the whole point of having it.
 3. ~~Choose the lexical-overlap measure.~~ **Resolved during Phase 0**: token-set Jaccard,
    case-insensitive over alphanumeric tokens. See "Lexical overlap: what it actually separates"
    above and D-012 for what it does and does not distinguish.
