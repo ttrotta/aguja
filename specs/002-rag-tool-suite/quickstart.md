@@ -70,10 +70,13 @@ Use a document containing **both** of these deliberately:
   one place and 14 days in another.
 
 1. Open Confusable Chunks and run it at the default threshold.
-2. **Expect** the contradictory pair to surface with high similarity and **low** shared wording,
-   and to be described as chunks the retriever cannot separate — never as duplicates (FR-045).
-3. **Expect** the reworded duplicate to surface with high shared wording, distinguishable from the
-   contradiction at a glance (SC-019).
+2. **Expect** the contradictory pair to surface with high similarity **and** high shared wording —
+   the same band a true duplicate occupies, since a one-word difference leaves nearly everything
+   else identical (D-012) — described as chunks the retriever cannot separate, never as
+   duplicates (FR-045).
+3. **Expect** both this pair and the reworded duplicate to show their own chunk text alongside
+   the two numbers, and to be distinguishable from each other by reading that text — not by the
+   numbers alone, which read the same for both (SC-019).
 4. Raise the threshold until nothing qualifies. **Expect** a statement that nothing met it, not a
    blank list (FR-051).
 5. Paste a document that yields a single chunk. **Expect** a statement that there is nothing to

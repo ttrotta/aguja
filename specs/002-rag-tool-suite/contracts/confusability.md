@@ -4,6 +4,13 @@ Two modules. `lexicalOverlap` is what makes the pair list honest — without it 
 reporting similarity and letting the reader infer duplication, which measurement showed to be
 false in the cases that matter most ([research.md](../research.md), D-011).
 
+It closes part of that gap, not all of it: `lexicalOverlap` reliably separates a paraphrase from a
+literal duplicate, but a one-word contradiction reads as high similarity *and* high overlap, same
+as a true duplicate — both share nearly all their wording (D-012). The UI layer (not this
+contract) closes the remaining gap by showing each pair's own chunk text alongside both numbers;
+this domain module's job stops at reporting the two numbers honestly, not at resolving every case
+by itself.
+
 ## `lexicalOverlap`
 
 ```ts
@@ -105,7 +112,8 @@ Written and observed failing before implementation.
 | Nothing meets threshold | Empty `pairs`, `chunksTotal >= 2` |
 | Length mismatch | Throws |
 | Same input twice | Deep-equal output (FR-052) |
-| Contradiction fixture (high similarity, low overlap) | Surfaced, with `lexicalOverlap` low — the case D-011 exists for |
+| Paraphrase-like fixture (high similarity, low lexical overlap) | Surfaced, with `lexicalOverlap` low — reported honestly, not upgraded to a "duplicate" label |
+| Contradiction-like fixture (high similarity, high lexical overlap — same numeric profile as a true duplicate) | Surfaced with `lexicalOverlap` high, same as a duplicate fixture would be. The function does not attempt to tell them apart; that both fixtures produce the same shape of output is the point (D-012) |
 
 Assertions use exact values. Tests construct normalized vectors directly rather than invoking the
 model, keeping the domain testable without a worker (Principle III).

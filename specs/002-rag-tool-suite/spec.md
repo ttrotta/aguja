@@ -84,27 +84,33 @@ window is 30 days, the other says 14 — but their retriever scores them as near
 Whichever comes back for a question about refunds is close to arbitrary. They want the pairs
 their retriever cannot separate, so they can see where its judgement is unreliable.
 
-The same view answers the redundancy question, because true duplicates also score high: chunks
-produced with overlap, and paraphrases of one fact, both show up. What distinguishes the two
-cases is whether the pair shares wording, so the analysis reports lexical overlap alongside
-similarity. High similarity with high shared wording is duplication — wasted context. High
-similarity with little shared wording is confusion — the retriever cannot tell two different
-statements apart, which is the more dangerous of the two.
+The same view also answers the redundancy question, because true duplicates score high too:
+chunks produced with overlap, and paraphrases of one fact, both show up. Similarity alone cannot
+tell the two situations apart — measurement found single-word contradictions like the refund
+example above scoring as high on both similarity *and* shared wording as a genuine duplicate
+does, since the two sentences differ by only one token. Lexical overlap reliably separates a
+literal duplicate from a paraphrase of the same fact (little shared wording despite high
+similarity), but it does not by itself separate a duplicate from a one-word contradiction — both
+share most of their text. The analysis therefore reports both numbers *and* the pair's own text
+side by side, so the one case the numbers cannot resolve is resolved by the reader looking at the
+words, not by an automated label (D-012).
 
 **Why this priority**: A severe and completely invisible failure, but narrower than phrasing
 brittleness, and the safest to build last once the suite's foundation is proven.
 
 **Independent Test**: Paste a document containing two passages that state contradictory versions
 of the same fact, run the analysis, and see them surfaced as a pair the retriever cannot
-separate, marked as low shared wording rather than as duplicates.
+separate — with their own text shown, since their similarity and shared-wording numbers alone
+read the same as a true duplicate would.
 
 **Acceptance Scenarios**:
 
 1. **Given** a chunked document, **When** the user runs the analysis, **Then** chunk pairs at or
    above the similarity threshold are listed, most similar first.
-2. **Given** a listed pair, **When** the user reads it, **Then** both the similarity and the
-   shared wording between the two chunks are shown, so duplication is distinguishable from
-   confusion.
+2. **Given** a listed pair, **When** the user reads it, **Then** the similarity, the shared
+   wording, and both chunks' own text are shown together — the two numbers alone separate a
+   paraphrase from a literal duplicate, but not a duplicate from a one-word contradiction, so the
+   text is what lets the reader resolve that case themselves.
 3. **Given** two chunks that state contradictory versions of one fact, **When** they score above
    the threshold, **Then** they are presented as chunks the retriever cannot separate, and never
    described as duplicates or as identical content.
@@ -139,11 +145,14 @@ separate, marked as low shared wording rather than as duplicates.
   does not show a stale or half-finished result as if it were complete.
 - The similarity threshold is set high enough that no pair qualifies: the tool states that
   nothing met the threshold rather than showing an empty list without explanation.
-- Two chunks contradict each other on the same fact: they score very high and must appear as a
-  pair the retriever cannot separate, never as duplicated content. This is the case the analysis
-  exists to catch, not an error in it.
-- Two chunks share almost all their wording because of overlap chunking: they appear with high
-  shared wording, marking them as genuine duplication rather than confusion.
+- Two chunks contradict each other on the same fact: they score very high on *both* similarity
+  and shared wording — a one-word difference leaves nearly everything else identical — and must
+  appear as a pair the retriever cannot separate, never as duplicated content. Shared wording
+  alone does not clear them as safe; this is the case the analysis exists to catch, not an error
+  in it (D-012).
+- Two chunks are near-identical because of overlap chunking, with no contradiction between them:
+  they also score high on both measures. The pair's own text is what tells this case apart from
+  the one above — the two numbers by themselves read the same for both.
 
 ## Requirements *(mandatory)*
 
@@ -190,8 +199,11 @@ governance documents cite those identifiers directly.
 
 - **FR-043**: The system MUST compare every chunk against every other chunk and surface the pairs
   whose similarity reaches a threshold.
-- **FR-044**: For every surfaced pair, the system MUST report both the similarity between the two
-  chunks and the wording they share, so that duplication and confusion are distinguishable.
+- **FR-044**: For every surfaced pair, the system MUST report the similarity between the two
+  chunks, the wording they share, and each chunk's own text. The two numbers alone reliably
+  separate a paraphrase from a literal duplicate, but not a duplicate from a one-word
+  contradiction — both share most of their wording — so the pair's text MUST be shown alongside
+  the numbers, not omitted in favor of them (D-012).
 - **FR-045**: The system MUST NOT describe a surfaced pair as duplicated, identical, or repeated
   content on the strength of similarity alone. Measurement against the model in use shows that
   chunks stating contradictory versions of one fact score higher than chunks sharing most of
@@ -230,10 +242,11 @@ governance documents cite those identifiers directly.
   Order is stable, so results are reproducible.
 - **Chunk rank profile**: For one chunk, its rank under each phrasing and the spread between its
   best and worst.
-- **Chunk pair**: Two distinct chunks, the similarity between them, and the wording they share.
-  Only pairs reaching the threshold are surfaced. The two measures together separate duplication
-  (similar and sharing wording) from confusion (similar without sharing wording); similarity
-  alone separates neither.
+- **Chunk pair**: Two distinct chunks, the similarity between them, the wording they share, and
+  each chunk's own text. Only pairs reaching the threshold are surfaced. Similarity alone
+  separates nothing; similarity plus shared wording separates a paraphrase from a literal
+  duplicate, but a one-word contradiction reads the same as a duplicate on both measures — the
+  chunk text is what the reader needs for that case (D-012).
 
 ## Success Criteria *(mandatory)*
 
@@ -258,8 +271,8 @@ Numbering continues from the v1 specification, which ends at SC-010.
 - **SC-018**: A user who opens any tool directly by address with nothing pasted understands what
   is missing without consulting documentation.
 - **SC-019**: Given a document containing both an overlap-produced duplicate pair and a pair
-  stating contradictory versions of one fact, a user can tell which is which from the results
-  alone, without reading the two chunks in full.
+  stating contradictory versions of one fact, a user can tell which is which from the results —
+  their displayed text included — without leaving the tool or consulting the source document.
 
 ## Assumptions
 

@@ -402,3 +402,53 @@ A separate measurement corrected the cost risk recorded in D-010. Comparing ever
 1 second for 2,000 chunks and 2.4 seconds for 3,000, while embedding that many chunks takes
 minutes. The chunk cap therefore exists to bound embedding work, not pair comparison; D-010's
 framing of the O(n²) comparison as the performance risk was wrong.
+
+---
+
+## D-012 — Lexical overlap separates paraphrase from duplication, not contradiction from duplication
+
+**Date**: 2026-07-28 · **Status**: Accepted
+
+**Context.** D-011 reframed the confusable-chunks tool around two numbers — similarity and lexical
+overlap — on the claim that high similarity with high shared wording means duplication, and high
+similarity with little shared wording means a dangerous confusion the retriever cannot resolve
+(spec.md User Story 3). Before implementing `lexicalOverlap`, that claim was checked against the
+same four sentence pairs D-011 measured, using token-set Jaccard:
+
+| Pair | Jaccard |
+|---|---|
+| "you must enable 2FA" / "you must **not** enable 2FA" | 0.857 |
+| "orders over $50" / "orders over $100" | 0.750 |
+| "1000 requests per hour" / "100 requests per hour" | 0.800 |
+| "we refund to the card you paid with…" / "refunds go back to your original payment method…" (paraphrase) | 0.100 |
+
+Every single-word contradiction scores *high* lexical overlap, not low — the sentences are
+identical except for one token, so nearly every other word matches. Only the genuine paraphrase,
+which reuses almost no literal wording, scores low. This inverts D-011's claim for exactly the
+case that claim was written to catch: a contradiction differing by one word is structurally
+indistinguishable, by any whole-text overlap measure, from a true duplicate produced by chunk
+overlap — both share the great majority of their tokens. Character n-gram overlap has the same
+problem for the same reason: the fraction of the text that changed is small regardless of which
+unit it's measured in.
+
+**Decision.** Drop the categorical claim. Lexical overlap distinguishes **paraphrase from literal
+duplication** reliably (confirmed above: 0.10 vs. 0.75–0.86) — that pairing stands. It does **not**
+reliably distinguish a single-word contradiction from a true duplicate; both present as high
+similarity and high overlap. The tool's job is therefore to surface the pair and both numbers, not
+to classify it. `ConfusablePairs` (the results UI) additionally shows each pair's chunk text
+alongside the two numbers, so the one case the numbers cannot resolve — is this a duplicate or a
+one-word contradiction? — is resolved by the reader looking at the actual words, not by an
+automated label. spec.md User Story 3 and FR-044 are corrected to say this rather than the
+stronger, now-known-false claim.
+
+**Why.** Shipping the original claim risked the opposite failure D-011 already fixed once: telling
+a user "these are duplicates" about a pair that is actually a live contradiction, on the strength
+of a number that cannot tell the difference. Product Principle 2 — never hide a failure this tool
+exists to expose — argues the same way here it did in D-011: don't launder an unresolved case
+through a confident-sounding label.
+
+**Consequences.** FR-044 gains a requirement to show chunk text alongside the two numbers.
+`ConfusablePair`/`ConfusabilityRun` in data-model.md need no field change — chunk text is already
+reachable from `chunks[pairIndex].text` in the caller, so this is a UI requirement, not a domain
+contract change. `lexicalOverlap`'s implementation and tests are unaffected; token-set Jaccard is
+still the chosen measure, just described accurately.

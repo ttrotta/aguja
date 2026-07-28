@@ -178,12 +178,14 @@ rank per phrasing and its spread, most volatile first.
 
 ## Phase 5: User Story 3 - Find out which chunks your retriever cannot tell apart (Priority: P3)
 
-**Goal**: Surface chunk pairs the retriever scores as near-identical, reporting similarity
-alongside lexical overlap so duplication and confusion read apart — never labeling a pair
-"duplicated" on similarity alone (D-011).
+**Goal**: Surface chunk pairs the retriever scores as near-identical, reporting similarity,
+lexical overlap, and each pair's own text — never labeling a pair "duplicated" on similarity
+alone (D-011), and never assuming lexical overlap alone tells a duplicate from a one-word
+contradiction, since measurement found both score high on overlap too (D-012).
 
 **Independent Test**: Paste a document containing a true reworded duplicate and a pair stating
-contradictory versions of one fact; both surface, distinguishably.
+contradictory versions of one fact; both surface, with their text visible so a reader — not the
+numbers alone — can tell them apart.
 
 ### Tests for User Story 3 ⚠️
 
@@ -208,9 +210,11 @@ contradictory versions of one fact; both surface, distinguishably.
       maxChunks`, `chunksTotal` unchanged, and only in-range pairs; zero chunks → empty `pairs`,
       `chunksTotal === 0`, no throw; one chunk → empty `pairs`, `chunksTotal === 1`, no throw;
       nothing meets threshold → empty `pairs` with `chunksTotal >= 2`; length mismatch throws; the
-      same input run twice is deep-equal; a contradiction fixture (two vectors built to be highly
-      similar with deliberately low lexical overlap) is surfaced with `lexicalOverlap` low — the
-      case D-011 exists for. Depends on T020 (uses `lexicalOverlap`).
+      same input run twice is deep-equal; a paraphrase-like fixture (high similarity, low lexical
+      overlap) surfaces with `lexicalOverlap` low; a contradiction-like fixture (high similarity,
+      high lexical overlap — the same numeric profile a true duplicate would produce) surfaces
+      the same shape either way, since the function does not attempt to tell the two apart
+      (D-012). Depends on T020 (uses `lexicalOverlap`).
 - [ ] T022 [US3] Implement `findConfusablePairs` in
       `src/features/confusability/domain/confusable-pairs.ts` per
       [contracts/confusability.md](./contracts/confusability.md): upper-triangle-only comparison
@@ -227,12 +231,14 @@ contradictory versions of one fact; both surface, distinguishably.
       control for the cosine threshold, defaulting to the value confirmed in T025 below,
       re-running the pair search on change (FR-046).
 - [ ] T024 [US3] Build `src/features/confusability/ui/ConfusablePairs.tsx`: renders a
-      `ConfusabilityRun`. Each pair shows both similarity and lexical overlap (FR-044), with
-      visibly different treatment for high-overlap (likely duplication) versus low-overlap (likely
-      confusion) pairs — never describing a pair as "duplicated" or "identical" on similarity
-      alone (FR-045). When `chunksCompared < chunksTotal`, a visible notice states the cap was
-      reached and how many chunks were excluded (FR-049). When `pairs` is empty, distinguishes
-      "nothing met the threshold" from "fewer than two chunks to compare" (FR-051).
+      `ConfusabilityRun`. Each pair shows similarity, lexical overlap, AND both chunks' own text
+      (FR-044) — lexical overlap alone tells a paraphrase apart from a literal duplicate, but a
+      one-word contradiction reads as high on both numbers, same as a true duplicate (D-012), so
+      the chunk text is not optional detail, it is what resolves that case. Never describe a pair
+      as "duplicated" or "identical" on the numbers alone (FR-045). When `chunksCompared <
+      chunksTotal`, a visible notice states the cap was reached and how many chunks were excluded
+      (FR-049). When `pairs` is empty, distinguishes "nothing met the threshold" from "fewer than
+      two chunks to compare" (FR-051).
 - [ ] T025 [US3] Confirm the similarity threshold in-browser (research.md Open Item 1):
       research.md's figures were measured on Node's `cpu` execution provider; the app runs
       `wasm`. Re-embed 3–4 of the measured pairs (a 75%-overlap duplicate pair, a paraphrase pair,
@@ -255,8 +261,9 @@ contradictory versions of one fact; both surface, distinguishably.
       into a plain Web Worker (pure arithmetic, no model needed, so this does not touch the
       embedding worker).
 - [ ] T028 [US3] Manual validation: run quickstart.md's Story 3 section — the contradiction pair
-      surfaces with high similarity and low overlap, never called a duplicate (FR-045); the
-      reworded-duplicate pair is distinguishable from it at a glance (SC-019); threshold changes
+      surfaces with high similarity AND high overlap (same band as the true duplicate — D-012),
+      never called a duplicate, and readable apart from the true duplicate only because both
+      chunks' text is shown (FR-045, SC-019); threshold changes
       update the list (FR-046); an oversized document shows the cap notice with the interface
       staying responsive throughout (FR-049, SC-014); a single-chunk and a no-match document each
       produce their distinct explicit message (FR-051).

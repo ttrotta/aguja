@@ -62,7 +62,9 @@ Negation is nearly invisible to this model: `must` and `must not` differ by 0.04
 **Decision.** No threshold separates duplication from contradiction, because the bands invert:
 every measured contradiction (0.93–0.96) outscores every measured true duplicate (≤0.76). The
 tool reports *confusable chunks* — pairs the retriever cannot separate — and pairs cosine with
-lexical overlap, which does distinguish the two cases. Recorded as D-011.
+lexical overlap. Recorded as D-011. **Update (D-012, below): lexical overlap distinguishes
+paraphrase from literal duplication, not contradiction from duplication — see "Lexical overlap:
+what it actually separates" after the threshold default.**
 
 **Rationale.** Calling a 0.95 pair "duplicated content" is false exactly where it matters most:
 a corpus holding both "you must enable 2FA" and "you must not enable 2FA" has a severe retrieval
@@ -81,6 +83,32 @@ looking at". Setting it at raw **0.70** (displayed **0.85**) admits 75%-overlap 
 (0.643–0.760, most of the band), paraphrase (0.7415), and every contradiction (0.93+), while
 excluding same-topic-different-fact (0.4980) and section boilerplate (0.5350). The gap between
 the traps and the admitted band is roughly 0.2, so the exact value is not delicate.
+
+### Lexical overlap: what it actually separates (D-012)
+
+Before implementing `lexicalOverlap`, the same four sentence pairs above were checked with
+token-set Jaccard, to confirm what D-011's "pairs cosine with lexical overlap" claim actually
+buys:
+
+| Pair | Jaccard |
+|---|---|
+| "you must enable 2FA" / "you must **not** enable 2FA" | 0.857 |
+| "orders over $50" / "orders over $100" | 0.750 |
+| "1000 requests per hour" / "100 requests per hour" | 0.800 |
+| "we refund to the card you paid with…" / "refunds go back to your original payment method…" (paraphrase) | 0.100 |
+
+Every contradiction scores *high*, not low — the sentences differ by one token, so nearly every
+other word matches. Only the genuine paraphrase, which reuses almost none of the literal wording,
+scores low. This inverts D-011's framing for exactly the case it was written to catch: a
+single-word contradiction is structurally indistinguishable, on any whole-text overlap measure,
+from a duplicate produced by chunk overlap. Character n-grams have the same problem for the same
+structural reason — the fraction of the text that changed is small either way.
+
+**Decision.** Lexical overlap reliably separates paraphrase from literal duplication (0.10 vs.
+0.75–0.86 above); it does not reliably separate a one-word contradiction from a true duplicate.
+`ConfusablePairs` shows each pair's own chunk text alongside both numbers, so the one case the
+numbers cannot resolve is resolved by the reader, not by an automated label. spec.md's User Story
+3, FR-044, and SC-019 are corrected accordingly. Full reasoning in D-012.
 
 ## Finding 2 — Pair comparison is not the bottleneck
 
@@ -122,7 +150,6 @@ in Finding 2's numbers, which were measured on the upper triangle already.
    in-browser numbers and this document is updated.
 2. **Choose the chunk cap against real embedding throughput**, measured in-browser on the target
    device, not from the pair-comparison figures above.
-3. **Choose the lexical-overlap measure.** It must be deterministic and framework-free. The
-   obvious candidates are token-set Jaccard and character n-gram overlap; the decision belongs
-   with the domain design, and whichever is chosen must be documented where a reader can find it
-   next to the similarity figure it disambiguates.
+3. ~~Choose the lexical-overlap measure.~~ **Resolved during Phase 0**: token-set Jaccard,
+   case-insensitive over alphanumeric tokens. See "Lexical overlap: what it actually separates"
+   above and D-012 for what it does and does not distinguish.

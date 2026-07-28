@@ -82,8 +82,11 @@ One per surfaced pair. Only pairs at or above the threshold exist (FR-043).
 
 **Why both measures**: similarity alone cannot separate duplication from confusion — measured
 contradictions score 0.93–0.96 while genuine 75%-overlap duplicates score 0.64–0.76
-([research.md](./research.md), D-011). `lexicalOverlap` is what distinguishes them, and FR-045
-forbids calling a pair duplicated without it.
+([research.md](./research.md), D-011). `lexicalOverlap` narrows the gap — it reliably separates a
+paraphrase from a literal duplicate — but a one-word contradiction still reads as high on both
+measures, indistinguishable from a true duplicate by the numbers alone (D-012). FR-045 forbids
+calling a pair duplicated on similarity alone; FR-044 requires the pair's own chunk text shown
+alongside both numbers, since that is what actually resolves the contradiction-vs-duplicate case.
 
 **Invariants**
 
