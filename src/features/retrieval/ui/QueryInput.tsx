@@ -28,27 +28,25 @@ export function QueryInput({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-1">
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-zinc-600 dark:text-zinc-400">Query</span>
-        <div className="flex gap-2">
+        <span className="text-text/60">Query</span>
+        <div className="flex flex-col gap-2">
           <input
             type="text"
             value={value}
             onChange={(event) => onChange(event.target.value)}
             placeholder="What are you trying to find?"
-            className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="min-w-0 w-full rounded-sm border border-text/30 bg-panel-inset-bg px-3 py-2 text-text placeholder:text-text/40 focus:border-violet focus:outline-none"
           />
           <button
             type="submit"
             disabled={!canSubmit}
-            className="rounded-md border border-indigo-500 bg-indigo-500 px-4 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-full bg-violet px-4 py-2 text-sm text-page-bg transition-colors hover:bg-violet-deep disabled:cursor-not-allowed disabled:opacity-40"
           >
             Search
           </button>
         </div>
       </label>
-      {disabled && disabledReason && (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">{disabledReason}</p>
-      )}
+      {disabled && disabledReason && <p className="text-sm text-text/60">{disabledReason}</p>}
     </form>
   );
 }

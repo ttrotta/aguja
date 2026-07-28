@@ -18,7 +18,7 @@ export const STRATEGY_LABELS: Record<ChunkingStrategy["type"], string> = {
 };
 
 const FIELD_CLASS =
-  "rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900";
+  "rounded-sm border border-text/30 bg-panel-inset-bg px-3 py-2 text-sm text-text focus:border-violet focus:outline-none";
 
 export function StrategyControls({ strategy, onChange, tokenizerReady }: StrategyControlsProps) {
   const validation = validateStrategy(strategy);
@@ -39,7 +39,7 @@ export function StrategyControls({ strategy, onChange, tokenizerReady }: Strateg
   return (
     <div className="flex flex-col gap-3">
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-zinc-600 dark:text-zinc-400">Strategy</span>
+        <span className="text-text/60">Strategy</span>
         <select value={strategy.type} onChange={handleTypeChange} className={FIELD_CLASS}>
           {Object.entries(STRATEGY_LABELS).map(([value, label]) => (
             <option key={value} value={value} disabled={value === "tokens" && !tokenizerReady}>
@@ -52,7 +52,7 @@ export function StrategyControls({ strategy, onChange, tokenizerReady }: Strateg
 
       {strategy.type === "fixed-size" && (
         <label className="flex flex-col gap-1 text-sm">
-          <span className="text-zinc-600 dark:text-zinc-400">Size (characters)</span>
+          <span className="text-text/60">Size (characters)</span>
           <input
             type="number"
             value={strategy.size}
@@ -67,7 +67,7 @@ export function StrategyControls({ strategy, onChange, tokenizerReady }: Strateg
       {strategy.type === "fixed-size-overlap" && (
         <>
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-zinc-600 dark:text-zinc-400">Size (characters)</span>
+            <span className="text-text/60">Size (characters)</span>
             <input
               type="number"
               value={strategy.size}
@@ -82,7 +82,7 @@ export function StrategyControls({ strategy, onChange, tokenizerReady }: Strateg
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-zinc-600 dark:text-zinc-400">Overlap (characters)</span>
+            <span className="text-text/60">Overlap (characters)</span>
             <input
               type="number"
               value={strategy.overlap}
@@ -101,7 +101,7 @@ export function StrategyControls({ strategy, onChange, tokenizerReady }: Strateg
 
       {strategy.type === "tokens" && (
         <label className="flex flex-col gap-1 text-sm">
-          <span className="text-zinc-600 dark:text-zinc-400">Size (tokens)</span>
+          <span className="text-text/60">Size (tokens)</span>
           <input
             type="number"
             value={strategy.size}
@@ -112,7 +112,7 @@ export function StrategyControls({ strategy, onChange, tokenizerReady }: Strateg
       )}
 
       {!validation.valid && (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm text-warning">
           {validation.reason}
         </p>
       )}

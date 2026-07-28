@@ -13,21 +13,22 @@ export function LoadProgress({ label, state, progress, error, fallbackNote }: Lo
     <div className="flex flex-col gap-1 text-sm" role="status">
       {state === "loading" && (
         <div className="flex items-center gap-2">
-          <div className="h-1.5 w-32 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+          <div className="h-[3px] w-32 overflow-hidden bg-text/15">
             <div
-              className="h-full bg-indigo-500 transition-all"
+              className="h-full bg-violet transition-all"
               style={{ width: `${Math.round(progress * 100)}%` }}
             />
           </div>
-          <span className="text-zinc-500 dark:text-zinc-400">
+          <span className="text-text/60">
             Downloading {label}… {Math.round(progress * 100)}%
           </span>
         </div>
       )}
       {state === "failed" && (
-        <p role="alert" className="text-red-600 dark:text-red-400">
-          Could not load {label}{error ? `: ${error}` : "."}
-          {fallbackNote && <span className="block text-zinc-500 dark:text-zinc-400">{fallbackNote}</span>}
+        <p role="alert" className="text-warning">
+          Could not load {label}
+          {error ? `: ${error}` : "."}
+          {fallbackNote && <span className="block text-text/60">{fallbackNote}</span>}
         </p>
       )}
     </div>

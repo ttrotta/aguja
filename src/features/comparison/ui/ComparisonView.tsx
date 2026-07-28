@@ -43,7 +43,7 @@ export function ComparisonView({ content, left, right }: ComparisonViewProps) {
   return (
     <div className="flex flex-col gap-3">
       {selectedOffset !== null && (
-        <p className="rounded-md border border-indigo-300 bg-indigo-50 p-2 text-sm text-zinc-700 dark:border-indigo-800 dark:bg-indigo-950 dark:text-zinc-300">
+        <p className="border-t-2 border-violet bg-panel-inset-bg p-2 text-sm text-text">
           Selected passage —{" "}
           <strong>{STRATEGY_LABELS[left.strategy.type]}</strong>:{" "}
           {leftResult ? `rank ${leftResult.rank} (${formatScore(leftResult.score)})` : "no chunk here"}
@@ -67,7 +67,7 @@ export function ComparisonView({ content, left, right }: ComparisonViewProps) {
               : (resultAtOffset(side.chunks, side.results, selectedOffset)?.chunkIndex ?? null);
           return (
             <div key={key} className="flex flex-col gap-3">
-              <h3 className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              <h3 className="text-base font-medium leading-none text-text">
                 {STRATEGY_LABELS[side.strategy.type]}
               </h3>
               <ChunkedDocument

@@ -41,20 +41,14 @@ export function DocumentInput({ value, onChange }: DocumentInputProps) {
         onChange={handleChange}
         placeholder="Paste a document to debug how it gets chunked..."
         aria-label="Document"
-        className="min-h-64 w-full resize-y rounded-md border border-zinc-300 bg-white p-4 font-mono text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+        className="min-h-64 w-full resize-y rounded-sm border border-text/30 bg-panel-inset-bg p-4 text-sm leading-relaxed text-text placeholder:text-text/40 focus:border-violet focus:outline-none"
       />
       <div className="flex items-center justify-between text-sm">
-        <span
-          className={
-            value.length >= MAX_DOCUMENT_LENGTH
-              ? "text-red-600 dark:text-red-400"
-              : "text-zinc-500 dark:text-zinc-400"
-          }
-        >
+        <span className={value.length >= MAX_DOCUMENT_LENGTH ? "text-warning" : "text-text/60"}>
           {value.length.toLocaleString()} / {MAX_DOCUMENT_LENGTH.toLocaleString()} characters
         </span>
         {refused && (
-          <span role="alert" className="text-red-600 dark:text-red-400">
+          <span role="alert" className="text-warning">
             That would go over the limit — the extra text was not accepted.
           </span>
         )}
