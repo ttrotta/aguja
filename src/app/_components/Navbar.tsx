@@ -38,7 +38,7 @@ export function Navbar() {
             href="/tool"
             className="rounded-full bg-violet px-5 py-2 text-sm font-medium text-page-bg transition-colors hover:bg-violet-deep"
           >
-            Abrir el debugger
+            Open the debugger
           </Link>
           <ThemeToggle />
         </nav>

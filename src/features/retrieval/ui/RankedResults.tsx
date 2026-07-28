@@ -52,10 +52,10 @@ function Pager({
         onClick={() => onChange(page - 1)}
         className="rounded-sm border border-text/30 px-3 py-1 text-sm text-text transition-colors hover:border-violet/60 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Anterior
+        Previous
       </button>
       <span className="text-sm text-text-muted">
-        página {page + 1} de {totalPages}
+        Page {page + 1} of {totalPages}
       </span>
       <button
         type="button"
@@ -63,7 +63,7 @@ function Pager({
         onClick={() => onChange(page + 1)}
         className="rounded-sm border border-text/30 px-3 py-1 text-sm text-text transition-colors hover:border-violet/60 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Siguiente
+        Next
       </button>
     </div>
   );

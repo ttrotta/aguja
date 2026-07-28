@@ -72,10 +72,10 @@ function Pager({
         onClick={() => onChange(page - 1)}
         className="rounded-sm border border-text/30 px-3 py-1 text-sm text-text transition-colors hover:border-violet/60 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Anterior
+        Previous
       </button>
       <span className="text-sm text-text-muted">
-        página {page + 1} de {totalPages}
+        Page {page + 1} of {totalPages}
       </span>
       <button
         type="button"
@@ -83,7 +83,7 @@ function Pager({
         onClick={() => onChange(page + 1)}
         className="rounded-sm border border-text/30 px-3 py-1 text-sm text-text transition-colors hover:border-violet/60 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Siguiente
+        Next
       </button>
     </div>
   );
@@ -208,13 +208,13 @@ export function ChunkedDocument({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-text-muted">Vista previa del documento</span>
+          <span className="text-sm text-text-muted">Document preview</span>
           <button
             type="button"
             onClick={() => setIsExpanded(true)}
             className="rounded-sm border border-text/30 px-2 py-1 text-xs text-text transition-colors hover:border-violet/60"
           >
-            Ver documento completo
+            View full document
           </button>
         </div>
         <pre className="scrollbar-hide max-h-64 overflow-y-auto whitespace-pre-wrap break-words rounded-sm border border-text/30 bg-panel-inset-bg p-4 font-sans text-sm leading-relaxed text-text">
@@ -261,7 +261,7 @@ export function ChunkedDocument({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Documento completo"
+          aria-label="Full document"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6"
           onClick={() => setIsExpanded(false)}
         >
@@ -270,11 +270,11 @@ export function ChunkedDocument({
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-text/10 p-4">
-              <h3 className="text-[1.125rem] font-medium text-text">Documento completo</h3>
+              <h3 className="text-[1.125rem] font-medium text-text">Full document</h3>
               <button
                 type="button"
                 onClick={() => setIsExpanded(false)}
-                aria-label="Cerrar"
+                aria-label="Close"
                 className="flex h-7 w-7 items-center justify-center rounded-sm border border-text/30 text-text transition-colors hover:border-violet/60"
               >
                 ✕

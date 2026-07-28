@@ -22,7 +22,7 @@ test("no request during a full session carries document or query text (SC-009, F
     }
   });
 
-  await page.goto("/");
+  await page.goto("/tool/chunks");
 
   // Paste.
   await page

@@ -9,7 +9,7 @@ test.describe("chunk visualization (US1 — P1)", () => {
   test("pasting a document shows chunk boundaries, each labeled with index and length (SC-001)", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/tool/chunks");
     await page.getByLabel("Document").fill("x".repeat(3000));
     await page.getByRole("combobox").selectOption("fixed-size");
     await page.getByLabel("Size (characters)").fill("500");
@@ -21,7 +21,7 @@ test.describe("chunk visualization (US1 — P1)", () => {
   });
 
   test("changing a parameter redraws without re-pasting (SC-002)", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/tool/chunks");
     await page.getByLabel("Document").fill("x".repeat(3000));
     await page.getByRole("combobox").selectOption("fixed-size");
 
@@ -33,7 +33,7 @@ test.describe("chunk visualization (US1 — P1)", () => {
   });
 
   test("redraws a maximum-size document well within budget (SC-002)", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/tool/chunks");
     await page.getByLabel("Document").fill("x".repeat(50_000));
     await page.getByRole("combobox").selectOption("fixed-size");
     await page.getByLabel("Size (characters)").fill("500");
@@ -51,7 +51,7 @@ test.describe("chunk visualization (US1 — P1)", () => {
   test("all four strategies are offered, and the three model-free ones work with no model loaded (SC-003)", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/tool/chunks");
     await page.getByLabel("Document").fill(THREE_PARAGRAPH_DOC);
 
     const select = page.getByRole("combobox");
@@ -70,7 +70,7 @@ test.describe("chunk visualization (US1 — P1)", () => {
   test("a document with no blank lines under paragraph chunking yields one chunk, explained (SC-010)", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/tool/chunks");
     await page
       .getByLabel("Document")
       .fill("Just one long paragraph with no breaks at all, only sentences here.");
