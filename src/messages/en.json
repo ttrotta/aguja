@@ -158,5 +158,11 @@
   },
   "notices": {
     "noBlankLines": "No blank lines found — the whole document is treated as one paragraph."
+  },
+  "docs": {
+    "title": "Docs",
+    "subtitle": "What each tool measures, how to read it, and what is happening underneath.",
+    "onThisPage": "On this page",
+    "nav": "Docs"
   }
 }

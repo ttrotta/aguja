@@ -158,5 +158,11 @@
   },
   "notices": {
     "noBlankLines": "No se encontraron líneas en blanco — todo el documento se trata como un solo párrafo."
+  },
+  "docs": {
+    "title": "Documentación",
+    "subtitle": "Qué mide cada herramienta, cómo leerla, y qué pasa por debajo.",
+    "onThisPage": "En esta página",
+    "nav": "Documentación"
   }
 }
