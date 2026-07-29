@@ -168,6 +168,16 @@
     "onThisPage": "On this page",
     "nav": "Docs"
   },
+  "news": {
+    "nav": "Research",
+    "title": "Latest RAG research",
+    "subtitle": "Recent papers on retrieval-augmented generation, pulled live from arXiv — nothing on this page is curated by hand.",
+    "abstractsLanguageNote": "Abstracts appear in the language they were published in — usually English.",
+    "source": "arXiv",
+    "readAbstract": "Read abstract",
+    "empty": "No papers came back this time — arXiv may be rate-limiting. Try again shortly.",
+    "unavailable": "Could not reach arXiv right now."
+  },
   "footer": {
     "privacy": "Everything runs in your browser. No document you paste ever leaves your device — there is no server to send it to, no account, and no API key.",
     "builtWith": "Built with",

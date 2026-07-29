@@ -30,6 +30,7 @@ function NavbarNeedle() {
 
 export function Navbar() {
   const tDocs = useTranslations("docs");
+  const tNews = useTranslations("news");
 
   return (
     <header className="sticky top-0 z-10 border-b border-text/10 bg-page-bg/80 backdrop-blur-md">
@@ -45,6 +46,12 @@ export function Navbar() {
             className="rounded-full px-2 py-1 text-sm text-text-muted transition-colors hover:text-text"
           >
             {tDocs("nav")}
+          </Link>
+          <Link
+            href="/news"
+            className="rounded-full px-2 py-1 text-sm text-text-muted transition-colors hover:text-text"
+          >
+            {tNews("nav")}
           </Link>
           {/* Separates what navigates from what configures. */}
           <span aria-hidden="true" className="mx-3 h-4 w-px bg-text/15" />

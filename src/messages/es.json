@@ -168,6 +168,16 @@
     "onThisPage": "En esta página",
     "nav": "Documentación"
   },
+  "news": {
+    "nav": "Investigación",
+    "title": "Investigación reciente en RAG",
+    "subtitle": "Papers recientes sobre generación aumentada por recuperación, traídos en vivo desde arXiv — nada en esta página está curado a mano.",
+    "abstractsLanguageNote": "Los resúmenes aparecen en el idioma en que se publicaron — casi siempre inglés.",
+    "source": "arXiv",
+    "readAbstract": "Leer resumen",
+    "empty": "No llegaron papers esta vez — puede que arXiv esté limitando la tasa de pedidos. Probá de nuevo en un momento.",
+    "unavailable": "No se pudo conectar con arXiv en este momento."
+  },
   "footer": {
     "privacy": "Todo corre en tu navegador. Ningún documento que pegues sale de tu dispositivo — no hay servidor al que mandarlo, ni cuenta, ni API key.",
     "builtWith": "Construido con",
