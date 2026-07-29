@@ -4,6 +4,7 @@ import { isSupportedLocale } from "@/features/localization/domain";
 import { docContentFor } from "@/features/documentation/content";
 import { DocSections, DocTableOfContents } from "@/features/documentation/ui/DocSections";
 import { Navbar } from "../../_components/Navbar";
+import { Footer } from "../../_components/Footer";
 
 export default async function DocsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -38,6 +39,7 @@ export default async function DocsPage({ params }: { params: Promise<{ locale: s
           </aside>
         </div>
       </main>
+      <Footer />
     </>
   );
 }

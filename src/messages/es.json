@@ -3,7 +3,9 @@
     "openDebugger": "Abrir el debugger",
     "themeToLight": "Cambiar al tema claro",
     "themeToDark": "Cambiar al tema oscuro",
-    "language": "Idioma"
+    "language": "Idioma",
+    "tools": "Herramientas",
+    "toolsMenu": "Abrir el menú de herramientas"
   },
   "landing": {
     "heroBody": "Un debugger para retrieval. Pegá un documento, mirá dónde caen los cortes y entendé de una vez por qué esa frase no aparece.",
@@ -164,5 +166,13 @@
     "subtitle": "Qué mide cada herramienta, cómo leerla, y qué pasa por debajo.",
     "onThisPage": "En esta página",
     "nav": "Documentación"
+  },
+  "footer": {
+    "privacy": "Todo corre en tu navegador. Ningún documento que pegues sale de tu dispositivo — no hay servidor al que mandarlo, ni cuenta, ni API key.",
+    "builtWith": "Construido con",
+    "model": "Xenova/all-MiniLM-L6-v2 — Apache-2.0",
+    "transformers": "Transformers.js — Apache-2.0",
+    "next": "Next.js — MIT",
+    "source": "Código en GitHub"
   }
 }

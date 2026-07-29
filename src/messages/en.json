@@ -3,7 +3,9 @@
     "openDebugger": "Open the debugger",
     "themeToLight": "Switch to light theme",
     "themeToDark": "Switch to dark theme",
-    "language": "Language"
+    "language": "Language",
+    "tools": "Tools",
+    "toolsMenu": "Open the tools menu"
   },
   "landing": {
     "heroBody": "A debugger for retrieval. Paste a document, see where the cuts fall, and finally understand why that sentence doesn't show up.",
@@ -164,5 +166,13 @@
     "subtitle": "What each tool measures, how to read it, and what is happening underneath.",
     "onThisPage": "On this page",
     "nav": "Docs"
+  },
+  "footer": {
+    "privacy": "Everything runs in your browser. No document you paste ever leaves your device — there is no server to send it to, no account, and no API key.",
+    "builtWith": "Built with",
+    "model": "Xenova/all-MiniLM-L6-v2 — Apache-2.0",
+    "transformers": "Transformers.js — Apache-2.0",
+    "next": "Next.js — MIT",
+    "source": "Source on GitHub"
   }
 }

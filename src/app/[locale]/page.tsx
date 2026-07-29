@@ -3,6 +3,7 @@ import { LandingHero } from "../_components/LandingHero";
 import { ProblemEvidenceBoard } from "../_components/ProblemEvidenceBoard";
 import { ProductWalkthrough } from "../_components/ProductWalkthrough";
 import { ClosingCta } from "../_components/ClosingCta";
+import { Footer } from "../_components/Footer";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
         <ProductWalkthrough />
         <ClosingCta />
       </main>
+      <Footer />
     </>
   );
 }
