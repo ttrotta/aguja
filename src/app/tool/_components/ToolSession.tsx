@@ -1,8 +1,15 @@
 "use client";
 
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useSyncExternalStore, type ReactNode } from "react";
 import { useEmbedder } from "@/features/retrieval/embedding/useEmbedder";
 import type { Embedding } from "@/features/retrieval/domain/embedding";
+import {
+  getDocumentContent,
+  getEmbeddingCache,
+  getServerDocumentContent,
+  setDocumentContent as writeDocumentContent,
+  subscribeToDocument,
+} from "./sessionStore";
 
 type Embedder = ReturnType<typeof useEmbedder>;
 
@@ -26,25 +33,29 @@ const ToolSessionContext = createContext<ToolSessionValue | null>(null);
  * for the lifetime of the page only — nothing here is ever persisted
  * (FR-030, FR-031, FR-033). Every tool reads this instead of owning its own
  * copy, which is what lets moving between tools cost nothing.
+ *
+ * The document and the embedding cache live in `sessionStore`, at module
+ * scope, not in this component's state. A locale segment above this layout
+ * remounts the provider on a language switch and would otherwise take the
+ * pasted document with it (research.md Finding 1). The shape exposed below is
+ * unchanged by that move, so no tool page had to be touched.
  */
 export function ToolSessionProvider({ children }: { children: ReactNode }) {
-  const [documentContent, setDocumentContentState] = useState("");
+  const documentContent = useSyncExternalStore(
+    subscribeToDocument,
+    getDocumentContent,
+    getServerDocumentContent,
+  );
   const embedder = useEmbedder();
 
-  // A new document invalidates every cached embedding — chunk text from the
-  // old document can never be asked for again, so holding it only wastes
-  // memory.
-  const cacheRef = useRef<Map<string, Embedding>>(new Map());
-
   const setDocumentContent = useCallback((next: string) => {
-    cacheRef.current = new Map();
-    setDocumentContentState(next);
+    writeDocumentContent(next);
   }, []);
 
   const embed = embedder.embed;
   const getOrEmbedChunks = useCallback(
     async (texts: string[]): Promise<Embedding[]> => {
-      const cache = cacheRef.current;
+      const cache = getEmbeddingCache();
       const missing = new Set<string>();
       for (const text of texts) {
         if (!cache.has(text)) missing.add(text);

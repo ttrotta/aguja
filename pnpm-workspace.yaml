@@ -1,4 +1,8 @@
 allowBuilds:
+  # Both arrive with next-intl and both publish prebuilt platform binaries,
+  # so neither needs its own build script to work here.
+  '@parcel/watcher': false
+  '@swc/core': false
   esbuild: true
   onnxruntime-node: true
   protobufjs: true
