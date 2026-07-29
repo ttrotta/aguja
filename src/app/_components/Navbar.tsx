@@ -29,7 +29,6 @@ function NavbarNeedle() {
 }
 
 export function Navbar() {
-  const t = useTranslations("nav");
   const tDocs = useTranslations("docs");
 
   return (
@@ -39,7 +38,7 @@ export function Navbar() {
           <NavbarNeedle />
           <span className="font-display text-2xl font-black leading-none">Aguja</span>
         </Link>
-        <nav className="flex items-center gap-3">
+        <nav className="flex items-center gap-1">
           <ToolsMenu />
           <Link
             href="/docs"
@@ -47,12 +46,8 @@ export function Navbar() {
           >
             {tDocs("nav")}
           </Link>
-          <Link
-            href="/tool"
-            className="ml-1 rounded-full bg-violet px-5 py-2 text-sm font-medium text-page-bg transition-colors hover:bg-violet-deep"
-          >
-            {t("openDebugger")}
-          </Link>
+          {/* Separates what navigates from what configures. */}
+          <span aria-hidden="true" className="mx-3 h-4 w-px bg-text/15" />
           <LocaleSwitcher />
           <ThemeToggle />
         </nav>

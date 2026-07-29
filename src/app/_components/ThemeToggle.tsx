@@ -25,28 +25,35 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={isLight ? t("themeToDark") : t("themeToLight")}
-      className="flex h-9 w-9 items-center justify-center rounded-full border border-text/20 text-text transition-colors hover:border-violet"
+      className="group flex h-9 w-9 items-center justify-center rounded-full border border-text/20 text-text transition-colors hover:border-violet"
     >
-      {isLight ? (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path
-            d="M14 9.2A6 6 0 0 1 6.8 2 6 6 0 1 0 14 9.2Z"
-            stroke="currentColor"
-            strokeWidth="1.3"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ) : (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <circle cx="8" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.3" />
-          <path
-            d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4"
-            stroke="currentColor"
-            strokeWidth="1.3"
-            strokeLinecap="round"
-          />
-        </svg>
-      )}
+      {/*
+        A dial on an instrument panel, not another sun and moon: the button's
+        own rim is the bezel, and the half-filled disc inside turns 180° so the
+        indicator tick swings from the dark half to the lit one. Which theme is
+        on reads from the position of a physical control.
+      */}
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 18 18"
+        fill="none"
+        aria-hidden="true"
+        className={[
+          "transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] motion-reduce:transition-none",
+          isLight ? "rotate-180" : "",
+        ].join(" ")}
+      >
+        <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.2" opacity="0.45" />
+        <path d="M9 3a6 6 0 0 1 0 12Z" fill="currentColor" />
+        <path
+          d="M9 1.1v1.3"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          className="opacity-70 transition-opacity group-hover:opacity-100"
+        />
+      </svg>
     </button>
   );
 }

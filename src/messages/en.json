@@ -4,6 +4,7 @@
     "themeToLight": "Switch to light theme",
     "themeToDark": "Switch to dark theme",
     "language": "Language",
+    "languageMenu": "Change language",
     "tools": "Tools",
     "toolsMenu": "Open the tools menu"
   },
