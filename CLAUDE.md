@@ -3,14 +3,13 @@
 Aguja is a debugger for retrieval systems: paste a document, see how it is split into chunks,
 run a query, see which chunks come back with scores and ranks.
 
-**v1 is built and shipped.** The application lives under `src/`, with the landing page at `/` and
-the debugger at `/tool`. Features are `chunking`, `retrieval`, `comparison`, `documents`, and
-`sharing`.
-
-**v2 is specified but not built.** `specs/002-rag-tool-suite/spec.md` turns `/tool` into a suite
-of tools sharing one document and one loaded model, and adds two analyses: query sensitivity
-across several phrasings, and a near-duplicate map over chunks. Nothing in it exists in `src/`
-yet; `plan.md` is the next artifact for it.
+**v1 and v2 are both built and shipped.** The application lives under `src/`. The landing page is
+at `/`; `/tool` redirects into a shared tool session with four sibling routes — `/tool/chunks`
+(chunk inspection), `/tool/compare` (strategy comparison), `/tool/queries` (query sensitivity),
+and `/tool/confusable` (confusable chunks) — all sharing one pasted document and one loaded model
+for the session (v2's contribution; v1 shipped a single combined chunking+retrieval view under
+`/tool` before the suite split it apart). Features under `src/features/` are `chunking`,
+`retrieval`, `comparison`, `sensitivity`, `confusability`, `documents`, and `sharing`.
 
 Read before doing anything:
 
@@ -18,8 +17,8 @@ Read before doing anything:
 |---|---|
 | `.specify/memory/constitution.md` | Binding principles. Wins over every other artifact. Currently 1.1.0. |
 | `specs/001-rag-chunking-debugger/spec.md` | What v1 does — user stories P1–P4, FR-001…FR-026, SC-001…SC-010 |
-| `specs/002-rag-tool-suite/spec.md` | What v2 adds — user stories P1–P3, FR-027…FR-051, SC-011…SC-018 |
-| `docs/decisions.md` | Why it is built this way. Append-only, D-001…D-010. |
+| `specs/002-rag-tool-suite/spec.md` | What v2 adds — user stories P1–P3, FR-027…FR-053, SC-011…SC-019 |
+| `docs/decisions.md` | Why it is built this way. Append-only, D-001…D-012. |
 | `PRODUCT.md` · `DESIGN.md` | Product truth and the visual system. DESIGN.md wins on visual decisions. |
 
 Spec Kit is installed; skills live in `.claude/skills/speckit-*`. The flow is constitution →
@@ -69,6 +68,10 @@ These were chosen with reasons recorded in `docs/decisions.md`. Do not "fix" the
   ship; if scope ever tightens again, retrieval is what gets cut, never the reverse (D-003).
 - **English-only, by choice** (D-006). The model was picked for a small first-visit download, not
   for quality or language coverage. Non-English scores are not trustworthy and the UI must say so.
+- **Cosine similarity alone does not mean duplication** (D-011), and lexical overlap only
+  separates paraphrase from literal duplication — it does not separate a one-word contradiction
+  from a true duplicate, since both share nearly all their wording (D-012). Confusable Chunks
+  reports both numbers plus each chunk's own text and never labels a pair "duplicate."
 
 The four chunking strategies in scope: fixed size by characters, fixed size with overlap, by
 paragraphs, and by tokenization units.
