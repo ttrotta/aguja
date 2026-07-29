@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Navbar } from "../_components/Navbar";
+import { Navbar } from "../../_components/Navbar";
 import { ToolSessionProvider } from "./_components/ToolSession";
 import { ToolSidebar } from "./_components/ToolSidebar";
 

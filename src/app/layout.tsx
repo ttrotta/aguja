@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Jost } from "next/font/google";
+import { getLocale } from "next-intl/server";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -30,13 +31,19 @@ const THEME_INIT_SCRIPT = `
   } catch (e) {}
 `;
 
-export default function RootLayout({
+// Only html/body live here. Everything locale-aware — the message provider,
+// the navbar, the footer — belongs to `[locale]/layout.tsx`, one level down.
+// The lang attribute is the exception: it has to sit on <html>, so the locale
+// is read from the request rather than from params this layout never receives.
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" className={`${fraunces.variable} ${jost.variable} h-full antialiased`}>
+    <html lang={locale} className={`${fraunces.variable} ${jost.variable} h-full antialiased`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
