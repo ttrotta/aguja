@@ -25,6 +25,10 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={isLight ? t("themeToDark") : t("themeToLight")}
+      // The label is deliberately one render ahead of the server on first
+      // paint (see the lazy initializer above) — an intentional, one-time
+      // mismatch that resolves before the user can act on it, not a bug.
+      suppressHydrationWarning
       className="group flex h-9 w-9 items-center justify-center rounded-full border border-text/20 text-text transition-colors hover:border-violet"
     >
       {/*
@@ -39,6 +43,7 @@ export function ThemeToggle() {
         viewBox="0 0 18 18"
         fill="none"
         aria-hidden="true"
+        suppressHydrationWarning
         className={[
           "transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] motion-reduce:transition-none",
           isLight ? "rotate-180" : "",

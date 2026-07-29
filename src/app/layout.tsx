@@ -43,7 +43,14 @@ export default async function RootLayout({
   const locale = await getLocale();
 
   return (
-    <html lang={locale} className={`${fraunces.variable} ${jost.variable} h-full antialiased`}>
+    <html
+      lang={locale}
+      // The blocking script below adds "light" here before React hydrates,
+      // whenever that's the saved preference — the server can never know it
+      // in advance, so this one class is an intentional, one-time mismatch.
+      suppressHydrationWarning
+      className={`${fraunces.variable} ${jost.variable} h-full antialiased`}
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
