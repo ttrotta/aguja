@@ -3,7 +3,8 @@
 import { useState } from "react";
 import type { Chunk } from "../../chunking/domain/chunk";
 import type { ChunkingStrategy } from "../../chunking/domain/strategy";
-import { STRATEGY_LABELS } from "../../chunking/ui/StrategyControls";
+import { useTranslations } from "next-intl";
+import { useStrategyLabels } from "../../chunking/ui/StrategyControls";
 import { ChunkedDocument } from "../../chunking/ui/ChunkedDocument";
 import { RankedResults } from "../../retrieval/ui/RankedResults";
 import type { RankedResult } from "../../retrieval/domain/ranking";
@@ -30,6 +31,8 @@ function formatScore(score: number): string {
 // strategies cut the document differently, so this is never just "the same
 // chunkIndex on both sides".
 export function ComparisonView({ content, left, right }: ComparisonViewProps) {
+  const t = useTranslations("comparison");
+  const labels = useStrategyLabels();
   const [selectedOffset, setSelectedOffset] = useState<number | null>(null);
 
   const leftResult = selectedOffset === null ? null : resultAtOffset(left.chunks, left.results, selectedOffset);
@@ -44,14 +47,16 @@ export function ComparisonView({ content, left, right }: ComparisonViewProps) {
     <div className="flex flex-col gap-3">
       {selectedOffset !== null && (
         <p className="border-t-2 border-violet bg-panel-inset-bg p-2 text-sm text-text">
-          Selected passage —{" "}
-          <strong>{STRATEGY_LABELS[left.strategy.type]}</strong>:{" "}
-          {leftResult ? `rank ${leftResult.rank} (${formatScore(leftResult.score)})` : "no chunk here"}
+          {t("selectedPassage")}{" "}
+          <strong>{labels[left.strategy.type]}</strong>:{" "}
+          {leftResult
+            ? t("rankAndScore", { rank: leftResult.rank, score: formatScore(leftResult.score) })
+            : t("noChunkHere")}
           {" · "}
-          <strong>{STRATEGY_LABELS[right.strategy.type]}</strong>:{" "}
+          <strong>{labels[right.strategy.type]}</strong>:{" "}
           {rightResult
-            ? `rank ${rightResult.rank} (${formatScore(rightResult.score)})`
-            : "no chunk here"}
+            ? t("rankAndScore", { rank: rightResult.rank, score: formatScore(rightResult.score) })
+            : t("noChunkHere")}
         </p>
       )}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -68,7 +73,7 @@ export function ComparisonView({ content, left, right }: ComparisonViewProps) {
           return (
             <div key={key} className="flex flex-col gap-3">
               <h3 className="text-base font-medium leading-none text-text">
-                {STRATEGY_LABELS[side.strategy.type]}
+                {labels[side.strategy.type]}
               </h3>
               <ChunkedDocument
                 content={content}

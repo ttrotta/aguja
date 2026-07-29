@@ -1,5 +1,10 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 type LoadProgressProps = {
-  label: string;
+  /** Message key for what is loading, resolved against the model catalogue. */
+  label: "targetTokenizer" | "targetModel";
   state: "idle" | "loading" | "ready" | "failed";
   progress: number;
   error: string | null;
@@ -7,7 +12,9 @@ type LoadProgressProps = {
 };
 
 export function LoadProgress({ label, state, progress, error, fallbackNote }: LoadProgressProps) {
+  const t = useTranslations("model");
   if (state === "idle" || state === "ready") return null;
+  const target = t(label);
 
   return (
     <div className="flex flex-col gap-1 text-sm" role="status">
@@ -20,14 +27,15 @@ export function LoadProgress({ label, state, progress, error, fallbackNote }: Lo
             />
           </div>
           <span className="text-text/60">
-            Downloading {label}… {Math.round(progress * 100)}%
+            {t("downloading", { target, percent: Math.round(progress * 100) })}
           </span>
         </div>
       )}
       {state === "failed" && (
         <p role="alert" className="text-warning">
-          Could not load {label}
-          {error ? `: ${error}` : "."}
+          {error
+            ? t("couldNotLoadWithReason", { target, reason: error })
+            : t("couldNotLoad", { target })}
           {fallbackNote && <span className="block text-text/60">{fallbackNote}</span>}
         </p>
       )}

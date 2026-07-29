@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useChunks } from "../../chunking/ui/useChunks";
 import { type ChunkingStrategy } from "../../chunking/domain";
@@ -33,6 +34,7 @@ export function useSensitivityQuery(
   embedder: Embedder,
   getOrEmbedChunks: (texts: string[]) => Promise<Embedding[]>,
 ) {
+  const tDisabled = useTranslations("disabled");
   const [strategy, setStrategy] = useState<ChunkingStrategy>({ type: "fixed-size", size: 500 });
   const [phrasings, setPhrasings] = useState<string[]>(["", ""]);
   const [state, setState] = useState<SensitivityState>(INITIAL_STATE);
@@ -41,11 +43,11 @@ export function useSensitivityQuery(
 
   const disabledReason =
     embedder.modelReady === "loading"
-      ? "Downloading the model — comparing phrasings isn't available yet."
+      ? tDisabled("downloadingPhrasings")
       : embedder.modelReady === "failed"
-        ? "Model failed to load, so comparing phrasings is unavailable."
+        ? tDisabled("modelFailedPhrasings")
         : chunks.length === 0
-          ? "No chunks to compare yet."
+          ? tDisabled("noChunksToCompare")
           : undefined;
 
   function changeStrategy(next: ChunkingStrategy) {

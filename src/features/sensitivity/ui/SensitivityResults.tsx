@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { ChunkRankProfile } from "../domain/rank-profile";
 
 type SensitivityResultsProps = {
@@ -9,12 +12,13 @@ type SensitivityResultsProps = {
 // rank spread descending, then chunkIndex ascending (FR-040) — so the most
 // phrasing-sensitive chunks read first without any client-side sort.
 export function SensitivityResults({ profiles, phrasingCount }: SensitivityResultsProps) {
+  const t = useTranslations("sensitivity");
   if (profiles.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-2">
       <h2 className="text-[1.125rem] font-medium leading-none text-text">
-        {profiles.length} chunk{profiles.length === 1 ? "" : "s"}, sorted by rank spread
+        {t("heading", { count: profiles.length })}
       </h2>
       <ol className="flex flex-col gap-1">
         {profiles.map((profile) => (
@@ -24,18 +28,22 @@ export function SensitivityResults({ profiles, phrasingCount }: SensitivityResul
           >
             <div className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-2">
-                <span>chunk {profile.chunkIndex}</span>
+                <span>{t("chunkLabel", { index: profile.chunkIndex })}</span>
                 {profile.truncated && (
                   <span
-                    title="This chunk's text was cut before embedding, so its ranking was decided without its tail."
+                    title={t("truncatedTitle")}
                     className="rounded-full border border-warning/60 px-2 py-0.5 text-xs text-warning"
                   >
-                    truncated
+                    {t("truncatedBadge")}
                   </span>
                 )}
               </span>
               <span className="tabular-nums text-text-muted">
-                spread {profile.rankSpread} (#{profile.bestRank}–#{profile.worstRank})
+                {t("spread", {
+                  spread: profile.rankSpread,
+                  best: profile.bestRank,
+                  worst: profile.worstRank,
+                })}
               </span>
             </div>
             <div className="flex flex-wrap gap-2 text-xs text-text-muted">
@@ -43,9 +51,9 @@ export function SensitivityResults({ profiles, phrasingCount }: SensitivityResul
                 <span
                   key={i}
                   className="rounded-sm border border-text/20 px-2 py-0.5 tabular-nums"
-                  title={`Phrasing ${i + 1} of ${phrasingCount}`}
+                  title={t("rankChipTitle", { number: i + 1, total: phrasingCount })}
                 >
-                  #{i + 1}: rank {rank}
+                  {t("rankChip", { number: i + 1, rank })}
                 </span>
               ))}
             </div>

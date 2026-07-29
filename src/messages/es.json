@@ -1,5 +1,162 @@
 {
   "nav": {
-    "openDebugger": "Abrir el debugger"
+    "openDebugger": "Abrir el debugger",
+    "themeToLight": "Cambiar al tema claro",
+    "themeToDark": "Cambiar al tema oscuro",
+    "language": "Idioma"
+  },
+  "landing": {
+    "heroBody": "Un debugger para retrieval. Pegá un documento, mirá dónde caen los cortes y entendé de una vez por qué esa frase no aparece.",
+    "problemHeading": "Los fallos de retrieval no avisan.",
+    "problemBody": "El pasaje está en el documento. La búsqueda no lo trae. Y nada te dice por qué — hasta que ves el corte.",
+    "problemNoteCut": "El corte cae justo acá, en medio de la frase — la mitad de \"regardless of the original payment method\" queda en el chunk siguiente.",
+    "problemNoteTruncation": "Este chunk ya tiene ~1.100 caracteres — el modelo trunca cerca de los 1.000, así que la nota sobre aduana nunca llega a embeberse.",
+    "problemNoteParagraph": "Sin línea en blanco entre \"4.2 Refunds\" y \"4.3\" → el chunking por párrafos junta las dos secciones en un solo chunk enorme.",
+    "problemExcerptCaption": "documento de ejemplo (sintético, en inglés) — política de reembolsos",
+    "walkthroughHeading": "Un solo hilo, de punta a punta.",
+    "walkthroughBody": "Cuatro pasos, un hilo violeta que corre por debajo de todos.",
+    "step1Label": "1 — Pegar",
+    "step1Text": "Texto plano, sin login, nunca sale del navegador.",
+    "step2Label": "2 — Cortar",
+    "step2Text": "4 estrategias de chunking, parámetros en vivo.",
+    "step3Label": "3 — Consultar",
+    "step3Text": "Cada chunk rankeado por score, sin recorte de top-N.",
+    "step4Label": "4 — Comparar",
+    "step4Text": "Dos estrategias lado a lado, o exportá el hallazgo.",
+    "ctaHeading": "Andá a ver dónde falla tu retrieval.",
+    "ctaSubtext": "Sin cuenta, sin login. Todo corre en tu navegador."
+  },
+  "toolDial": {
+    "ariaLabel": "Herramientas de Aguja",
+    "hint": "Elegí una herramienta, o usá las flechas del teclado.",
+    "comingSoon": "Próximamente"
+  },
+  "tools": {
+    "sidebarAriaLabel": "Herramientas",
+    "chunks": "Inspector de chunks",
+    "compare": "Comparación de estrategias",
+    "queries": "Sensibilidad a la consulta",
+    "confusable": "Chunks confundibles"
+  },
+  "notice": {
+    "englishOnlyTitle": "El análisis es solo en inglés",
+    "englishOnlyBody": "La interfaz habla tu idioma; el modelo de embeddings no. Un documento en cualquier otro idioma igual produce scores, y esos scores no son confiables."
+  },
+  "emptyState": {
+    "noDocument": "Todavía no hay documento.",
+    "pasteIn": "Pegá uno en <link>Inspector de chunks</link> para usar esta herramienta.",
+    "downloading": "Descargando el modelo… {percent}%"
+  },
+  "document": {
+    "ariaLabel": "Documento",
+    "placeholder": "Pegá un documento para depurar cómo se corta en chunks...",
+    "counter": "{used, number} / {max, number} caracteres",
+    "refused": "Eso pasaría el límite — el texto de más no se aceptó."
+  },
+  "strategy": {
+    "label": "Estrategia",
+    "sizeCharacters": "Tamaño (caracteres)",
+    "sizeTokens": "Tamaño (tokens)",
+    "overlapCharacters": "Solapamiento (caracteres)",
+    "fixedSize": "Tamaño fijo",
+    "fixedSizeOverlap": "Tamaño fijo con solapamiento",
+    "paragraphs": "Párrafos",
+    "tokens": "Por unidades de tokenización",
+    "tokenizerLoadingSuffix": " (cargando el tokenizador…)",
+    "errorSizeTooSmall": "El tamaño tiene que ser al menos 1.",
+    "errorOverlapNegative": "El solapamiento no puede ser negativo.",
+    "errorOverlapNotLessThanSize": "El solapamiento tiene que ser menor que el tamaño."
+  },
+  "model": {
+    "downloading": "Descargando {target}… {percent}%",
+    "targetTokenizer": "el tokenizador",
+    "targetModel": "el modelo",
+    "couldNotLoad": "No se pudo cargar {target}.",
+    "couldNotLoadWithReason": "No se pudo cargar {target}: {reason}",
+    "tokenizerFallback": "El chunking por tamaño fijo, con solapamiento y por párrafos sigue funcionando sin él.",
+    "modelFallback": "La visualización de chunks de arriba sigue funcionando sin él; solo las consultas quedan sin uso."
+  },
+  "query": {
+    "label": "Consulta",
+    "placeholder": "¿Qué estás tratando de encontrar?",
+    "submit": "Buscar",
+    "failed": "La consulta falló: {message}"
+  },
+  "chunkedDocument": {
+    "preview": "Vista previa del documento",
+    "viewFull": "Ver el documento completo",
+    "fullDocument": "Documento completo",
+    "close": "Cerrar",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "page": "Página {page} de {total}",
+    "chunkCount": "{count, plural, one {# chunk} other {# chunks}}",
+    "chunkChip": "#{index} · {length} caracteres",
+    "chunkTitle": "chunk {indices} — {length} caracteres",
+    "chunkDetail": "Chunk #{index} — [{start}, {end}) — {length} caracteres"
+  },
+  "results": {
+    "heading": "{count, plural, one {# resultado} other {# resultados}}, ordenados por similitud",
+    "chunkLabel": "chunk {index} · [{start}, {end})",
+    "truncatedBadge": "truncado — {embedded}/{total} tokens",
+    "truncatedTitle": "{dropped} de {total} tokens no se embebieron"
+  },
+  "sensitivity": {
+    "phrasingsLabel": "Formulaciones de una misma pregunta",
+    "phrasingPlaceholder": "Formulación {number}",
+    "removePhrasing": "Quitar la formulación {number}",
+    "addPhrasing": "Agregar formulación",
+    "submit": "Comparar formulaciones",
+    "needTwo": "Comparar formulaciones necesita al menos dos.",
+    "heading": "{count, plural, one {# chunk} other {# chunks}}, ordenados por dispersión de rank",
+    "chunkLabel": "chunk {index}",
+    "truncatedBadge": "truncado",
+    "truncatedTitle": "El texto de este chunk se cortó antes de embeberse, así que su ranking se decidió sin su cola.",
+    "spread": "dispersión {spread} (#{best}–#{worst})",
+    "rankChip": "#{number}: rank {rank}",
+    "rankChipTitle": "Formulación {number} de {total}",
+    "running": "Comparando formulaciones…",
+    "prompt": "Ingresá al menos dos formulaciones de una misma pregunta a la izquierda y después comparalas."
+  },
+  "confusability": {
+    "threshold": "Umbral de similitud",
+    "compare": "Comparar chunks",
+    "running": "Comparando chunks…",
+    "prompt": "Elegí una estrategia a la izquierda y después compará los chunks.",
+    "notEnoughChunks": "No hay chunks suficientes para comparar — hacen falta al menos dos.",
+    "noPairs": "Ningún par alcanzó el umbral.",
+    "capNotice": "Se compararon los primeros {compared} de {total} chunks — el resto quedó afuera para que esto siga respondiendo.",
+    "heading": "{count, plural, one {# par} other {# pares}} que el retriever no puede separar",
+    "pairLabel": "chunk {first} ↔ chunk {second}",
+    "similarity": "sim {value}",
+    "similarityTitle": "Similitud",
+    "overlap": "solapamiento {value}",
+    "overlapTitle": "Palabras compartidas",
+    "downloadingModel": "Descargando el modelo — comparar chunks todavía no está disponible.",
+    "modelFailed": "El modelo no se pudo cargar, así que comparar chunks no está disponible."
+  },
+  "comparison": {
+    "selectedPassage": "Pasaje seleccionado —",
+    "rankAndScore": "rank {rank} ({score})",
+    "noChunkHere": "no hay chunk acá"
+  },
+  "sharing": {
+    "download": "Descargar imagen de resumen",
+    "imageSubtitle": "resumen de retrieval",
+    "imageStrategy": "Estrategia: {name} ({parameters})",
+    "imageQuery": "Consulta: \"{query}\"",
+    "imageTopN": "Top {shown} de {total} chunks rankeados:",
+    "imageTruncatedSuffix": " · truncado"
+  },
+  "disabled": {
+    "downloadingQuery": "Descargando el modelo — consultar todavía no está disponible.",
+    "modelFailedQuery": "El modelo no se pudo cargar, así que consultar no está disponible.",
+    "noChunksToSearch": "Todavía no hay chunks para buscar.",
+    "downloadingPhrasings": "Descargando el modelo — comparar formulaciones todavía no está disponible.",
+    "modelFailedPhrasings": "El modelo no se pudo cargar, así que comparar formulaciones no está disponible.",
+    "noChunksToCompare": "Todavía no hay chunks para comparar."
+  },
+  "notices": {
+    "noBlankLines": "No se encontraron líneas en blanco — todo el documento se trata como un solo párrafo."
   }
 }

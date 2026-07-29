@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { Chunk } from "../domain/chunk";
 import { toSegments } from "../domain/segments";
 
@@ -63,6 +64,7 @@ function Pager({
   totalPages: number;
   onChange: (page: number) => void;
 }) {
+  const t = useTranslations("chunkedDocument");
   if (totalPages <= 1) return null;
   return (
     <div className="flex items-center justify-between gap-3">
@@ -72,10 +74,10 @@ function Pager({
         onClick={() => onChange(page - 1)}
         className="rounded-sm border border-text/30 px-3 py-1 text-sm text-text transition-colors hover:border-violet/60 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Previous
+        {t("previous")}
       </button>
       <span className="text-sm text-text-muted">
-        Page {page + 1} of {totalPages}
+        {t("page", { page: page + 1, total: totalPages })}
       </span>
       <button
         type="button"
@@ -83,7 +85,7 @@ function Pager({
         onClick={() => onChange(page + 1)}
         className="rounded-sm border border-text/30 px-3 py-1 text-sm text-text transition-colors hover:border-violet/60 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Next
+        {t("next")}
       </button>
     </div>
   );
@@ -96,6 +98,7 @@ export function ChunkedDocument({
   selectedIndex,
   onSelectIndex,
 }: ChunkedDocumentProps) {
+  const t = useTranslations("chunkedDocument");
   const segments = toSegments(chunks, content.length);
   const selectedChunk = selectedIndex === null ? null : (chunks[selectedIndex] ?? null);
 
@@ -164,7 +167,10 @@ export function ChunkedDocument({
               onSelectIndex(primaryChunk);
             }
           }}
-          title={`chunk ${segment.chunkIndices.join(", ")} — ${segment.end - segment.start} characters`}
+          title={t("chunkTitle", {
+            indices: segment.chunkIndices.join(", "),
+            length: segment.end - segment.start,
+          })}
           className={[
             "cursor-pointer pb-0.5 transition-colors",
             isSelected
@@ -208,13 +214,13 @@ export function ChunkedDocument({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-text-muted">Document preview</span>
+          <span className="text-sm text-text-muted">{t("preview")}</span>
           <button
             type="button"
             onClick={() => setIsExpanded(true)}
             className="rounded-sm border border-text/30 px-2 py-1 text-xs text-text transition-colors hover:border-violet/60"
           >
-            View full document
+            {t("viewFull")}
           </button>
         </div>
         <pre className="scrollbar-hide max-h-64 overflow-y-auto whitespace-pre-wrap break-words rounded-sm border border-text/30 bg-panel-inset-bg p-4 font-sans text-sm leading-relaxed text-text">
@@ -224,7 +230,7 @@ export function ChunkedDocument({
 
       <div className="flex flex-col gap-1">
         <h2 className="text-[1.125rem] font-medium leading-none text-text">
-          {chunks.length} chunk{chunks.length === 1 ? "" : "s"}
+          {t("chunkCount", { count: chunks.length })}
         </h2>
         <Pager page={currentPage} totalPages={totalPages} onChange={setPage} />
         <ul className="flex flex-wrap gap-2 text-sm">
@@ -240,7 +246,7 @@ export function ChunkedDocument({
                     : "border-text/30 hover:border-violet/60",
                 ].join(" ")}
               >
-                #{c.index} · {c.length} chars
+                {t("chunkChip", { index: c.index, length: c.length })}
               </button>
             </li>
           ))}
@@ -250,8 +256,12 @@ export function ChunkedDocument({
       {selectedChunk && (
         <div className="border-t-2 border-violet bg-panel-inset-bg p-3 text-sm">
           <p className="font-medium text-text/80">
-            Chunk #{selectedChunk.index} — [{selectedChunk.start}, {selectedChunk.end}) —{" "}
-            {selectedChunk.length} characters
+            {t("chunkDetail", {
+              index: selectedChunk.index,
+              start: selectedChunk.start,
+              end: selectedChunk.end,
+              length: selectedChunk.length,
+            })}
           </p>
           <p className="mt-1 whitespace-pre-wrap break-words text-text">{selectedChunk.text}</p>
         </div>
@@ -261,7 +271,7 @@ export function ChunkedDocument({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Full document"
+          aria-label={t("fullDocument")}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6"
           onClick={() => setIsExpanded(false)}
         >
@@ -270,11 +280,11 @@ export function ChunkedDocument({
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-text/10 p-4">
-              <h3 className="text-[1.125rem] font-medium text-text">Full document</h3>
+              <h3 className="text-[1.125rem] font-medium text-text">{t("fullDocument")}</h3>
               <button
                 type="button"
                 onClick={() => setIsExpanded(false)}
-                aria-label="Close"
+                aria-label={t("close")}
                 className="flex h-7 w-7 items-center justify-center rounded-sm border border-text/30 text-text transition-colors hover:border-violet/60"
               >
                 ✕

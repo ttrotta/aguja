@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useChunks } from "../../chunking/ui/useChunks";
 import { type ChunkingStrategy } from "../../chunking/domain";
@@ -23,6 +24,8 @@ type Embedder = ReturnType<typeof useEmbedder>;
  * its submission, and the selected-chunk highlight shared with RankedResults.
  */
 export function useSingleStrategyQuery(documentContent: string, embedder: Embedder) {
+  const tDisabled = useTranslations("disabled");
+  const tNotices = useTranslations("notices");
   const [strategy, setStrategy] = useState<ChunkingStrategy>({ type: "fixed-size", size: 500 });
   const [selectedChunkIndex, setSelectedChunkIndex] = useState<number | null>(null);
   const [queryText, setQueryText] = useState("");
@@ -32,16 +35,16 @@ export function useSingleStrategyQuery(documentContent: string, embedder: Embedd
 
   const notice =
     strategy.type === "paragraphs" && chunks.length === 1
-      ? "No blank lines found — the whole document is treated as one paragraph."
+      ? tNotices("noBlankLines")
       : null;
 
   const disabledReason =
     embedder.modelReady === "loading"
-      ? "Downloading the model — querying isn't available yet."
+      ? tDisabled("downloadingQuery")
       : embedder.modelReady === "failed"
-        ? "Model failed to load, so querying is unavailable."
+        ? tDisabled("modelFailedQuery")
         : chunks.length === 0
-          ? "No chunks to search yet."
+          ? tDisabled("noChunksToSearch")
           : undefined;
 
   // A ranking only means what it says for the chunk set it was computed

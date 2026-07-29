@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useChunks } from "../../chunking/ui/useChunks";
 import { type ChunkingStrategy } from "../../chunking/domain";
@@ -38,6 +39,7 @@ export function useConfusabilityQuery(
   embedder: Embedder,
   getOrEmbedChunks: (texts: string[]) => Promise<Embedding[]>,
 ) {
+  const tConf = useTranslations("confusability");
   const [strategy, setStrategy] = useState<ChunkingStrategy>({ type: "fixed-size", size: 500 });
   const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD);
   const [state, setState] = useState<ConfusabilityState>(INITIAL_STATE);
@@ -46,11 +48,11 @@ export function useConfusabilityQuery(
 
   const disabledReason =
     embedder.modelReady === "loading"
-      ? "Downloading the model — comparing chunks isn't available yet."
+      ? tConf("downloadingModel")
       : embedder.modelReady === "failed"
-        ? "Model failed to load, so comparing chunks is unavailable."
+        ? tConf("modelFailed")
         : chunks.length < 2
-          ? "Not enough chunks to compare — need at least two."
+          ? tConf("notEnoughChunks")
           : undefined;
 
   function changeStrategy(next: ChunkingStrategy) {

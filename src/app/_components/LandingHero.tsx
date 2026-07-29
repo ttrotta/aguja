@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { ToolDial } from "./ToolDial";
 
 // A large, dimensional needle — the landing-scale version of the motif.
@@ -53,6 +54,8 @@ function ScrollCue() {
 }
 
 export function LandingHero() {
+  const t = useTranslations("landing");
+
   return (
     <section className="relative mx-auto flex w-full max-w-7xl flex-col items-center gap-14 px-6 py-20 md:min-h-[calc(100vh-69px)] md:flex-row md:items-center md:justify-between md:gap-4 md:py-0">
       <div className="flex flex-col items-center gap-10 md:flex-row md:items-center md:gap-2">
@@ -63,8 +66,7 @@ export function LandingHero() {
           <p
             className="mt-6 max-w-xl text-balance text-[1.25rem] text-text-muted tracking-wide md:mt-8 md:text-left"
           >
-            A debugger for retrieval. Paste a document, see where the cuts fall, and finally
-            understand why that sentence doesn&rsquo;t show up.
+            {t("heroBody")}
           </p>
         </div>
         <BigNeedle />

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Navbar } from "../../_components/Navbar";
+import { EnglishOnlyNotice } from "@/features/localization/ui/EnglishOnlyNotice";
 import { ToolSessionProvider } from "./_components/ToolSession";
 import { ToolSidebar } from "./_components/ToolSidebar";
 
@@ -14,9 +15,14 @@ export default function ToolLayout({ children }: { children: ReactNode }) {
       <div className="flex min-h-full flex-col md:h-dvh md:overflow-hidden">
         <Navbar />
         <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-4 py-6 md:min-h-0 md:px-8 md:py-10">
-          <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-text/10 bg-panel-bg shadow-[0_24px_64px_-12px_rgba(0,0,0,0.55)] md:min-h-0 md:flex-row">
-            <ToolSidebar />
-            <div className="flex flex-1 flex-col md:min-h-0">{children}</div>
+          <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-text/10 bg-panel-bg shadow-[0_24px_64px_-12px_rgba(0,0,0,0.55)] md:min-h-0">
+            {/* Stated once for the whole suite: every surface that accepts a
+                document or shows scores sits below this line (FR-062). */}
+            <EnglishOnlyNotice />
+            <div className="flex flex-1 flex-col md:min-h-0 md:flex-row">
+              <ToolSidebar />
+              <div className="flex flex-1 flex-col md:min-h-0">{children}</div>
+            </div>
           </div>
         </main>
       </div>

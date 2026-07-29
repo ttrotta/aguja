@@ -1,4 +1,5 @@
 import { test, expect, type Page, type Locator } from "@playwright/test";
+import { routes } from "./routes";
 
 // The model is a real ~23 MB download from the Hugging Face CDN — these
 // tests exercise the actual worker, not a mock, so give the model load
@@ -28,7 +29,7 @@ test.describe("retrieval (US2 — P2)", () => {
   test.describe.configure({ timeout: 150_000 });
 
   test("labeled progress is shown while the model downloads (SC-004, FR-019)", async ({ page }) => {
-    await page.goto("/tool/chunks");
+    await page.goto(routes.chunks());
     await page.getByLabel("Document").fill("Anything non-empty to reveal the model status.");
     // The download is real and can finish before we look, so this only
     // asserts the progress UI *can* appear — not that it always does.
@@ -41,7 +42,7 @@ test.describe("retrieval (US2 — P2)", () => {
   test("ranks every chunk by descending score, with no top-N cut (FR-014, SC-006)", async ({
     page,
   }) => {
-    await page.goto("/tool/chunks");
+    await page.goto(routes.chunks());
     const paragraph = "The quick brown fox jumps over the lazy dog. ".repeat(20);
     await page
       .getByLabel("Document")
@@ -71,7 +72,7 @@ test.describe("retrieval (US2 — P2)", () => {
   test("re-running an identical query returns identical scores (SC-007, FR-016)", async ({
     page,
   }) => {
-    await page.goto("/tool/chunks");
+    await page.goto(routes.chunks());
     await page.getByLabel("Document").fill("Some sample document text used to test determinism here.");
     await page.getByPlaceholder("What are you trying to find?").fill("sample text");
 
@@ -90,7 +91,7 @@ test.describe("retrieval (US2 — P2)", () => {
   test("chunks with identical text tie, and the earlier one ranks first (FR-015)", async ({
     page,
   }) => {
-    await page.goto("/tool/chunks");
+    await page.goto(routes.chunks());
     // Every 20-character fixed-size chunk below is byte-identical, so their
     // embeddings — and therefore their scores — tie exactly.
     await page.getByLabel("Document").fill("repeat me please!!!!".repeat(4));
@@ -109,7 +110,7 @@ test.describe("retrieval (US2 — P2)", () => {
   });
 
   test("a chunk over the model's input limit is flagged truncated (FR-017)", async ({ page }) => {
-    await page.goto("/tool/chunks");
+    await page.goto(routes.chunks());
     await page.getByLabel("Document").fill("a fairly long word here ".repeat(200));
     await page.getByRole("combobox").selectOption("fixed-size");
     await page.getByLabel("Size (characters)").fill("2000");
@@ -124,7 +125,7 @@ test.describe("retrieval (US2 — P2)", () => {
   test("selecting a ranked result highlights its chunk in the document view (FR-018)", async ({
     page,
   }) => {
-    await page.goto("/tool/chunks");
+    await page.goto(routes.chunks());
     await page
       .getByLabel("Document")
       .fill("First short chunk here.\n\nSecond short chunk over here instead.");

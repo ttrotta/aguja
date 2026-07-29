@@ -1,4 +1,6 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { LocaleSwitcher } from "@/features/localization/ui/LocaleSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 
 function NavbarNeedle() {
@@ -26,6 +28,8 @@ function NavbarNeedle() {
 }
 
 export function Navbar() {
+  const t = useTranslations("nav");
+
   return (
     <header className="sticky top-0 z-10 border-b border-text/10 bg-page-bg/80 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
@@ -33,13 +37,14 @@ export function Navbar() {
           <NavbarNeedle />
           <span className="font-display text-2xl font-black leading-none">Aguja</span>
         </Link>
-        <nav className="flex items-center gap-5">
+        <nav className="flex items-center gap-4">
           <Link
             href="/tool"
             className="rounded-full bg-violet px-5 py-2 text-sm font-medium text-page-bg transition-colors hover:bg-violet-deep"
           >
-            Open the debugger
+            {t("openDebugger")}
           </Link>
+          <LocaleSwitcher />
           <ThemeToggle />
         </nav>
       </div>

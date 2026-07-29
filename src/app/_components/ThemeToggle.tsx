@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export function ThemeToggle() {
+  const t = useTranslations("nav");
   // Lazy initializer, not an effect: reads the DOM state the blocking
   // init script in layout.tsx already applied, at first client render.
   // Stays null during SSR (no `document`), then resolves on hydration
@@ -22,7 +24,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label={isLight ? "Switch to dark theme" : "Switch to light theme"}
+      aria-label={isLight ? t("themeToDark") : t("themeToLight")}
       className="flex h-9 w-9 items-center justify-center rounded-full border border-text/20 text-text transition-colors hover:border-violet"
     >
       {isLight ? (

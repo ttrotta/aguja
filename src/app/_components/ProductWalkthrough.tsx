@@ -1,15 +1,17 @@
+import { useTranslations } from "next-intl";
+
 type Step = {
-  label: string;
-  text: string;
+  /** Message-key suffix; the copy itself lives in the catalogues. */
+  key: "step1" | "step2" | "step3" | "step4";
   align: "top" | "bottom";
   leftPct: number;
 };
 
 const STEPS: Step[] = [
-  { label: "1 — Paste", text: "Plain text, no login, never leaves the browser.", align: "top", leftPct: 8 },
-  { label: "2 — Chunk", text: "4 chunking strategies, live parameters.", align: "bottom", leftPct: 36 },
-  { label: "3 — Query", text: "Every chunk ranked by score, no top-N cutoff.", align: "top", leftPct: 64 },
-  { label: "4 — Compare", text: "Two strategies side by side, or export the finding.", align: "bottom", leftPct: 90 },
+  { key: "step1", align: "top", leftPct: 8 },
+  { key: "step2", align: "bottom", leftPct: 36 },
+  { key: "step3", align: "top", leftPct: 64 },
+  { key: "step4", align: "bottom", leftPct: 90 },
 ];
 
 function MiniVisual({ index }: { index: number }) {
@@ -57,15 +59,15 @@ function MiniVisual({ index }: { index: number }) {
 }
 
 export function ProductWalkthrough() {
+  const t = useTranslations("landing");
+
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-24">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="font-display text-4xl font-black text-text md:text-5xl">
-          One thread, start to finish.
+          {t("walkthroughHeading")}
         </h2>
-        <p className="mt-4 text-lg text-text-muted">
-          Four steps, one violet thread running underneath all of them.
-        </p>
+        <p className="mt-4 text-lg text-text-muted">{t("walkthroughBody")}</p>
       </div>
 
       <div className="relative mt-8 flex flex-col gap-10 md:mt-24 md:h-[280px] md:flex-row md:gap-0">
@@ -86,7 +88,7 @@ export function ProductWalkthrough() {
 
         {STEPS.map((step, i) => (
           <div
-            key={step.label}
+            key={step.key}
             className="relative flex flex-col gap-2 md:absolute md:w-56 md:-translate-x-1/2"
             style={{
               left: `${step.leftPct}%`,
@@ -95,8 +97,8 @@ export function ProductWalkthrough() {
             }}
           >
             <span className="h-2 w-2 self-start rounded-full bg-violet md:self-auto" />
-            <p className="font-display text-lg font-black text-text">{step.label}</p>
-            <p className="text-sm text-text-muted">{step.text}</p>
+            <p className="font-display text-lg font-black text-text">{t(`${step.key}Label`)}</p>
+            <p className="text-sm text-text-muted">{t(`${step.key}Text`)}</p>
             <MiniVisual index={i} />
           </div>
         ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { MAX_DOCUMENT_LENGTH, isEmpty, validateDocument } from "../domain/document";
 
 type DocumentInputProps = {
@@ -9,6 +10,7 @@ type DocumentInputProps = {
 };
 
 export function DocumentInput({ value, onChange }: DocumentInputProps) {
+  const t = useTranslations("document");
   const [refused, setRefused] = useState(false);
 
   // Nothing is persisted — a reload silently discards the pasted document,
@@ -39,17 +41,17 @@ export function DocumentInput({ value, onChange }: DocumentInputProps) {
       <textarea
         value={value}
         onChange={handleChange}
-        placeholder="Paste a document to debug how it gets chunked..."
-        aria-label="Document"
+        placeholder={t("placeholder")}
+        aria-label={t("ariaLabel")}
         className="min-h-64 w-full resize-y rounded-sm border border-text/30 bg-panel-inset-bg p-4 text-sm leading-relaxed text-text placeholder:text-text/40 focus:border-violet focus:outline-none"
       />
       <div className="flex items-center justify-between text-sm">
         <span className={value.length >= MAX_DOCUMENT_LENGTH ? "text-warning" : "text-text/60"}>
-          {value.length.toLocaleString()} / {MAX_DOCUMENT_LENGTH.toLocaleString()} characters
+          {t("counter", { used: value.length, max: MAX_DOCUMENT_LENGTH })}
         </span>
         {refused && (
           <span role="alert" className="text-warning">
-            That would go over the limit — the extra text was not accepted.
+            {t("refused")}
           </span>
         )}
       </div>

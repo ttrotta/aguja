@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { isEmpty } from "@/features/documents/domain/document";
 import { StrategyControls } from "@/features/chunking/ui/StrategyControls";
 import { ModelStatus } from "@/features/retrieval/ui/ModelStatus";
@@ -11,6 +12,7 @@ import { useToolSession } from "../_components/ToolSession";
 import { ToolEmptyState } from "../_components/ToolEmptyState";
 
 export default function QuerySensitivityPage() {
+  const t = useTranslations("sensitivity");
   const { documentContent, embedder, getOrEmbedChunks } = useToolSession();
   const sensitivity = useSensitivityQuery(documentContent, embedder, getOrEmbedChunks);
 
@@ -49,7 +51,7 @@ export default function QuerySensitivityPage() {
           <ToolEmptyState reason="no-document" />
         ) : sensitivity.state.status === "running" ? (
           <div className="flex h-full min-h-[240px] items-center justify-center text-sm text-text-muted">
-            Comparing phrasings…
+            {t("running")}
           </div>
         ) : hasResults ? (
           <SensitivityResults
@@ -58,7 +60,7 @@ export default function QuerySensitivityPage() {
           />
         ) : (
           <div className="flex h-full min-h-[240px] items-center justify-center text-center text-sm text-text-muted">
-            Enter at least two phrasings of one question on the left, then compare them.
+            {t("prompt")}
           </div>
         )}
       </div>

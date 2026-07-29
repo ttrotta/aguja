@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { isEmpty } from "@/features/documents/domain/document";
 import { StrategyControls } from "@/features/chunking/ui/StrategyControls";
 import { ModelStatus } from "@/features/retrieval/ui/ModelStatus";
@@ -11,6 +12,7 @@ import { useToolSession } from "../_components/ToolSession";
 import { ToolEmptyState } from "../_components/ToolEmptyState";
 
 export default function ConfusableChunksPage() {
+  const t = useTranslations("confusability");
   const { documentContent, embedder, getOrEmbedChunks } = useToolSession();
   const confusability = useConfusabilityQuery(documentContent, embedder, getOrEmbedChunks);
 
@@ -51,7 +53,7 @@ export default function ConfusableChunksPage() {
             disabled={!canRun}
             className="w-full rounded-full bg-violet px-4 py-2 text-sm text-page-bg transition-colors hover:bg-violet-deep disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Compare chunks
+            {t("compare")}
           </button>
           {!canRun && confusability.disabledReason && (
             <p className="text-sm text-text/60">{confusability.disabledReason}</p>
@@ -68,13 +70,13 @@ export default function ConfusableChunksPage() {
           <ToolEmptyState reason="no-document" />
         ) : confusability.state.status === "running" ? (
           <div className="flex h-full min-h-[240px] items-center justify-center text-sm text-text-muted">
-            Comparing chunks…
+            {t("running")}
           </div>
         ) : hasRun && confusability.state.run ? (
           <ConfusablePairs run={confusability.state.run} chunks={confusability.chunks} />
         ) : (
           <div className="flex h-full min-h-[240px] items-center justify-center text-center text-sm text-text-muted">
-            Set a strategy on the left, then compare chunks.
+            {t("prompt")}
           </div>
         )}
       </div>

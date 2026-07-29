@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 type ThresholdControlProps = {
   /** Raw cosine, [-1, 1] — the domain's own scale. */
   threshold: number;
@@ -18,11 +20,12 @@ function toRaw(display: number): number {
 }
 
 export function ThresholdControl({ threshold, onChange }: ThresholdControlProps) {
+  const t = useTranslations("confusability");
   const display = toDisplay(threshold);
   return (
     <div className="flex flex-col gap-2">
       <label className="flex items-center justify-between text-sm text-text/60">
-        <span>Similarity threshold</span>
+        <span>{t("threshold")}</span>
         <span className="tabular-nums text-text">{display.toFixed(2)}</span>
       </label>
       <input
@@ -32,7 +35,7 @@ export function ThresholdControl({ threshold, onChange }: ThresholdControlProps)
         step={0.01}
         value={display}
         onChange={(event) => onChange(toRaw(Number(event.target.value)))}
-        aria-label="Similarity threshold"
+        aria-label={t("threshold")}
         className="accent-violet"
       />
     </div>

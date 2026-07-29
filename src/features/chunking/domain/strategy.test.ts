@@ -22,23 +22,22 @@ describe("validateStrategy", () => {
 
   it("rejects size <= 0 for fixed-size, naming the violated constraint", () => {
     const zero = validateStrategy({ type: "fixed-size", size: 0 });
-    expect(zero.valid).toBe(false);
-    expect((zero as { reason: string }).reason).toMatch(/size/i);
+    expect(zero).toEqual({ valid: false, reason: "size-too-small" });
 
     const negative = validateStrategy({ type: "fixed-size", size: -5 });
     expect(negative.valid).toBe(false);
   });
 
   it("rejects size <= 0 for tokens, naming the violated constraint", () => {
-    const result = validateStrategy({ type: "tokens", size: 0 });
-    expect(result.valid).toBe(false);
-    expect((result as { reason: string }).reason).toMatch(/size/i);
+    expect(validateStrategy({ type: "tokens", size: 0 })).toEqual({
+      valid: false,
+      reason: "size-too-small",
+    });
   });
 
   it("rejects overlap >= size for fixed-size-overlap, naming the violated constraint", () => {
     const equal = validateStrategy({ type: "fixed-size-overlap", size: 100, overlap: 100 });
-    expect(equal.valid).toBe(false);
-    expect((equal as { reason: string }).reason).toMatch(/overlap/i);
+    expect(equal).toEqual({ valid: false, reason: "overlap-not-less-than-size" });
 
     const greater = validateStrategy({ type: "fixed-size-overlap", size: 100, overlap: 150 });
     expect(greater.valid).toBe(false);

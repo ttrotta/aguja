@@ -3,7 +3,8 @@
 import { useRef } from "react";
 import type { Chunk } from "../../chunking/domain/chunk";
 import type { ChunkingStrategy } from "../../chunking/domain/strategy";
-import { STRATEGY_LABELS } from "../../chunking/ui/StrategyControls";
+import { useTranslations } from "next-intl";
+import { useStrategyLabels } from "../../chunking/ui/StrategyControls";
 import type { RankedResult } from "../../retrieval/domain/ranking";
 
 type SummaryImageProps = {
@@ -48,6 +49,8 @@ function truncate(text: string, max: number): string {
 }
 
 export function SummaryImage({ strategy, query, chunks, results }: SummaryImageProps) {
+  const t = useTranslations("sharing");
+  const labels = useStrategyLabels();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const displayFontRef = useRef<HTMLSpanElement>(null);
   const bodyFontRef = useRef<HTMLSpanElement>(null);
@@ -81,20 +84,20 @@ export function SummaryImage({ strategy, query, chunks, results }: SummaryImageP
 
     ctx.font = `500 13px ${bodyFont}`;
     ctx.fillStyle = TEXT_MUTED;
-    ctx.fillText("retrieval summary", 24, 62);
+    ctx.fillText(t("imageSubtitle"), 24, 62);
 
     ctx.font = `15px ${bodyFont}`;
     ctx.fillStyle = TEXT;
     ctx.fillText(
-      `Strategy: ${STRATEGY_LABELS[strategy.type]} (${formatParameters(strategy)})`,
+      t("imageStrategy", { name: labels[strategy.type], parameters: formatParameters(strategy) }),
       24,
       92,
     );
-    ctx.fillText(`Query: "${truncate(query, 80)}"`, 24, 114);
+    ctx.fillText(t("imageQuery", { query: truncate(query, 80) }), 24, 114);
 
     ctx.font = `500 14px ${bodyFont}`;
     ctx.fillStyle = TEXT_MUTED;
-    ctx.fillText(`Top ${top.length} of ${results.length} ranked chunks:`, 24, 144);
+    ctx.fillText(t("imageTopN", { shown: top.length, total: results.length }), 24, 144);
 
     top.forEach((result, i) => {
       const chunk = chunks[result.chunkIndex];
@@ -105,7 +108,7 @@ export function SummaryImage({ strategy, query, chunks, results }: SummaryImageP
       ctx.font = `500 14px ${bodyFont}`;
       ctx.fillStyle = TEXT;
       ctx.fillText(
-        `#${result.rank} · chunk ${chunk?.index ?? "?"}${result.truncated ? " · truncated" : ""}`,
+        `#${result.rank} · chunk ${chunk?.index ?? "?"}${result.truncated ? t("imageTruncatedSuffix") : ""}`,
         24,
         y,
       );
@@ -153,7 +156,7 @@ export function SummaryImage({ strategy, query, chunks, results }: SummaryImageP
         onClick={handleDownload}
         className="self-start rounded-sm border border-text/30 px-3 py-2 text-sm text-text transition-colors hover:border-violet"
       >
-        Download summary image
+        {t("download")}
       </button>
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
       <span ref={displayFontRef} className="font-display hidden" aria-hidden="true">

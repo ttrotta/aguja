@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { routes } from "./routes";
 
 // The verifiable form of the constitution's strongest claim (Principle V):
 // nothing the user pastes or types ever leaves the device. If this test
@@ -22,7 +23,7 @@ test("no request during a full session carries document or query text (SC-009, F
     }
   });
 
-  await page.goto("/tool/chunks");
+  await page.goto(routes.chunks());
 
   // Paste.
   await page

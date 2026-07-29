@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { ConfusabilityRun } from "../domain/confusable-pairs";
 import type { Chunk } from "../../chunking/domain/chunk";
 
@@ -25,10 +28,12 @@ function preview(text: string): string {
 // resolves that case. Never labels a pair "duplicated" or "identical"
 // (FR-045).
 export function ConfusablePairs({ run, chunks }: ConfusablePairsProps) {
+  const t = useTranslations("confusability");
+
   if (run.chunksTotal < 2) {
     return (
       <div className="flex h-full min-h-[240px] items-center justify-center text-center text-sm text-text-muted">
-        Not enough chunks to compare — need at least two.
+        {t("notEnoughChunks")}
       </div>
     );
   }
@@ -40,20 +45,18 @@ export function ConfusablePairs({ run, chunks }: ConfusablePairsProps) {
           <span aria-hidden="true" className="text-warning">
             ▲
           </span>
-          Compared the first {run.chunksCompared} of {run.chunksTotal} chunks — the rest were left
-          out to keep this responsive.
+          {t("capNotice", { compared: run.chunksCompared, total: run.chunksTotal })}
         </p>
       )}
 
       {run.pairs.length === 0 ? (
         <div className="flex h-full min-h-[200px] items-center justify-center text-center text-sm text-text-muted">
-          No pairs met the threshold.
+          {t("noPairs")}
         </div>
       ) : (
         <div className="flex flex-col gap-2">
           <h2 className="text-[1.125rem] font-medium leading-none text-text">
-            {run.pairs.length} pair{run.pairs.length === 1 ? "" : "s"} the retriever cannot
-            separate
+            {t("heading", { count: run.pairs.length })}
           </h2>
           <ol className="flex flex-col gap-2">
             {run.pairs.map((pair) => {
@@ -66,11 +69,18 @@ export function ConfusablePairs({ run, chunks }: ConfusablePairsProps) {
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span>
-                      chunk {pair.firstChunkIndex} ↔ chunk {pair.secondChunkIndex}
+                      {t("pairLabel", {
+                        first: pair.firstChunkIndex,
+                        second: pair.secondChunkIndex,
+                      })}
                     </span>
                     <span className="flex items-center gap-3 tabular-nums text-text-muted">
-                      <span title="Similarity">sim {toDisplayScore(pair.similarity).toFixed(3)}</span>
-                      <span title="Shared wording">overlap {pair.lexicalOverlap.toFixed(2)}</span>
+                      <span title={t("similarityTitle")}>
+                        {t("similarity", { value: toDisplayScore(pair.similarity).toFixed(3) })}
+                      </span>
+                      <span title={t("overlapTitle")}>
+                        {t("overlap", { value: pair.lexicalOverlap.toFixed(2) })}
+                      </span>
                     </span>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:grid-cols-2">

@@ -27,6 +27,17 @@ export default defineConfig({
           exclude: ["src/features/**/domain/**"],
         },
       },
+      {
+        // Catalogue parity is neither domain logic nor a component, but it is
+        // the only thing enforcing FR-059 — typed keys cannot catch a key that
+        // exists in one locale and not the other. Its own project keeps the
+        // "domain" name meaning what Principle III says it means.
+        test: {
+          name: "messages",
+          environment: "node",
+          include: ["src/messages/**/*.test.ts"],
+        },
+      },
     ],
   },
 });

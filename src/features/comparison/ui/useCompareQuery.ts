@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useChunks } from "../../chunking/ui/useChunks";
 import { type ChunkingStrategy } from "../../chunking/domain";
@@ -28,6 +29,7 @@ type Embedder = ReturnType<typeof useEmbedder>;
  * embed() batch so both sides score off an identical query embedding.
  */
 export function useCompareQuery(documentContent: string, embedder: Embedder) {
+  const tDisabled = useTranslations("disabled");
   const [leftStrategy, setLeftStrategy] = useState<ChunkingStrategy>({
     type: "fixed-size",
     size: 500,
@@ -47,11 +49,11 @@ export function useCompareQuery(documentContent: string, embedder: Embedder) {
   const chunkCount = Math.min(leftChunks.length, rightChunks.length);
   const disabledReason =
     embedder.modelReady === "loading"
-      ? "Downloading the model — querying isn't available yet."
+      ? tDisabled("downloadingQuery")
       : embedder.modelReady === "failed"
-        ? "Model failed to load, so querying is unavailable."
+        ? tDisabled("modelFailedQuery")
         : chunkCount === 0
-          ? "No chunks to search yet."
+          ? tDisabled("noChunksToSearch")
           : undefined;
 
   function changeLeftStrategy(next: ChunkingStrategy) {

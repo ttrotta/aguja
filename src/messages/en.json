@@ -1,5 +1,162 @@
 {
   "nav": {
-    "openDebugger": "Open the debugger"
+    "openDebugger": "Open the debugger",
+    "themeToLight": "Switch to light theme",
+    "themeToDark": "Switch to dark theme",
+    "language": "Language"
+  },
+  "landing": {
+    "heroBody": "A debugger for retrieval. Paste a document, see where the cuts fall, and finally understand why that sentence doesn't show up.",
+    "problemHeading": "Retrieval failures don't announce themselves.",
+    "problemBody": "The passage is in the document. The search doesn't bring it back. And nothing tells you why — until you see the cut.",
+    "problemNoteCut": "The cut falls right here, mid-sentence — half of \"regardless of the original payment method\" ends up in the next chunk.",
+    "problemNoteTruncation": "This chunk is already ~1,100 characters — the model truncates around 1,000, so the customs note never gets embedded.",
+    "problemNoteParagraph": "No blank line between \"4.2 Refunds\" and \"4.3\" → paragraph chunking collapses both sections into one giant chunk.",
+    "problemExcerptCaption": "example document (synthetic, English) — refund policy",
+    "walkthroughHeading": "One thread, start to finish.",
+    "walkthroughBody": "Four steps, one violet thread running underneath all of them.",
+    "step1Label": "1 — Paste",
+    "step1Text": "Plain text, no login, never leaves the browser.",
+    "step2Label": "2 — Chunk",
+    "step2Text": "4 chunking strategies, live parameters.",
+    "step3Label": "3 — Query",
+    "step3Text": "Every chunk ranked by score, no top-N cutoff.",
+    "step4Label": "4 — Compare",
+    "step4Text": "Two strategies side by side, or export the finding.",
+    "ctaHeading": "Go see where your retrieval fails.",
+    "ctaSubtext": "No account, no login. Everything runs in your browser."
+  },
+  "toolDial": {
+    "ariaLabel": "Aguja tools",
+    "hint": "Choose a tool, or use the arrow keys.",
+    "comingSoon": "Coming soon"
+  },
+  "tools": {
+    "sidebarAriaLabel": "Tools",
+    "chunks": "Chunk Inspector",
+    "compare": "Strategy Comparison",
+    "queries": "Query Sensitivity",
+    "confusable": "Confusable Chunks"
+  },
+  "notice": {
+    "englishOnlyTitle": "The analysis is English-only",
+    "englishOnlyBody": "The interface speaks your language; the embedding model does not. A document in any other language still produces scores, and those scores are not trustworthy."
+  },
+  "emptyState": {
+    "noDocument": "No document yet.",
+    "pasteIn": "Paste one in <link>Chunk Inspector</link> to use this tool.",
+    "downloading": "Downloading the model… {percent}%"
+  },
+  "document": {
+    "ariaLabel": "Document",
+    "placeholder": "Paste a document to debug how it gets chunked...",
+    "counter": "{used, number} / {max, number} characters",
+    "refused": "That would go over the limit — the extra text was not accepted."
+  },
+  "strategy": {
+    "label": "Strategy",
+    "sizeCharacters": "Size (characters)",
+    "sizeTokens": "Size (tokens)",
+    "overlapCharacters": "Overlap (characters)",
+    "fixedSize": "Fixed size",
+    "fixedSizeOverlap": "Fixed size with overlap",
+    "paragraphs": "Paragraphs",
+    "tokens": "By tokenization units",
+    "tokenizerLoadingSuffix": " (loading tokenizer…)",
+    "errorSizeTooSmall": "Size must be at least 1.",
+    "errorOverlapNegative": "Overlap must not be negative.",
+    "errorOverlapNotLessThanSize": "Overlap must be less than size."
+  },
+  "model": {
+    "downloading": "Downloading {target}… {percent}%",
+    "targetTokenizer": "tokenizer",
+    "targetModel": "model",
+    "couldNotLoad": "Could not load {target}.",
+    "couldNotLoadWithReason": "Could not load {target}: {reason}",
+    "tokenizerFallback": "Fixed-size, fixed-size-overlap, and paragraph chunking still work without it.",
+    "modelFallback": "Chunk visualization above still works without it; only querying is unavailable."
+  },
+  "query": {
+    "label": "Query",
+    "placeholder": "What are you trying to find?",
+    "submit": "Search",
+    "failed": "Query failed: {message}"
+  },
+  "chunkedDocument": {
+    "preview": "Document preview",
+    "viewFull": "View full document",
+    "fullDocument": "Full document",
+    "close": "Close",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {total}",
+    "chunkCount": "{count, plural, one {# chunk} other {# chunks}}",
+    "chunkChip": "#{index} · {length} chars",
+    "chunkTitle": "chunk {indices} — {length} characters",
+    "chunkDetail": "Chunk #{index} — [{start}, {end}) — {length} characters"
+  },
+  "results": {
+    "heading": "{count, plural, one {# result} other {# results}}, ranked by similarity",
+    "chunkLabel": "chunk {index} · [{start}, {end})",
+    "truncatedBadge": "truncated — {embedded}/{total} tokens",
+    "truncatedTitle": "{dropped} of {total} tokens were not embedded"
+  },
+  "sensitivity": {
+    "phrasingsLabel": "Phrasings of one question",
+    "phrasingPlaceholder": "Phrasing {number}",
+    "removePhrasing": "Remove phrasing {number}",
+    "addPhrasing": "Add phrasing",
+    "submit": "Compare phrasings",
+    "needTwo": "Comparing phrasings needs at least two.",
+    "heading": "{count, plural, one {# chunk} other {# chunks}}, sorted by rank spread",
+    "chunkLabel": "chunk {index}",
+    "truncatedBadge": "truncated",
+    "truncatedTitle": "This chunk's text was cut before embedding, so its ranking was decided without its tail.",
+    "spread": "spread {spread} (#{best}–#{worst})",
+    "rankChip": "#{number}: rank {rank}",
+    "rankChipTitle": "Phrasing {number} of {total}",
+    "running": "Comparing phrasings…",
+    "prompt": "Enter at least two phrasings of one question on the left, then compare them."
+  },
+  "confusability": {
+    "threshold": "Similarity threshold",
+    "compare": "Compare chunks",
+    "running": "Comparing chunks…",
+    "prompt": "Set a strategy on the left, then compare chunks.",
+    "notEnoughChunks": "Not enough chunks to compare — need at least two.",
+    "noPairs": "No pairs met the threshold.",
+    "capNotice": "Compared the first {compared} of {total} chunks — the rest were left out to keep this responsive.",
+    "heading": "{count, plural, one {# pair} other {# pairs}} the retriever cannot separate",
+    "pairLabel": "chunk {first} ↔ chunk {second}",
+    "similarity": "sim {value}",
+    "similarityTitle": "Similarity",
+    "overlap": "overlap {value}",
+    "overlapTitle": "Shared wording",
+    "downloadingModel": "Downloading the model — comparing chunks isn't available yet.",
+    "modelFailed": "Model failed to load, so comparing chunks is unavailable."
+  },
+  "comparison": {
+    "selectedPassage": "Selected passage —",
+    "rankAndScore": "rank {rank} ({score})",
+    "noChunkHere": "no chunk here"
+  },
+  "sharing": {
+    "download": "Download summary image",
+    "imageSubtitle": "retrieval summary",
+    "imageStrategy": "Strategy: {name} ({parameters})",
+    "imageQuery": "Query: \"{query}\"",
+    "imageTopN": "Top {shown} of {total} ranked chunks:",
+    "imageTruncatedSuffix": " · truncated"
+  },
+  "disabled": {
+    "downloadingQuery": "Downloading the model — querying isn't available yet.",
+    "modelFailedQuery": "Model failed to load, so querying is unavailable.",
+    "noChunksToSearch": "No chunks to search yet.",
+    "downloadingPhrasings": "Downloading the model — comparing phrasings isn't available yet.",
+    "modelFailedPhrasings": "Model failed to load, so comparing phrasings is unavailable.",
+    "noChunksToCompare": "No chunks to compare yet."
+  },
+  "notices": {
+    "noBlankLines": "No blank lines found — the whole document is treated as one paragraph."
   }
 }

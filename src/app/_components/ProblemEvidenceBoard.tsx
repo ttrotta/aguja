@@ -1,3 +1,8 @@
+import { useTranslations } from "next-intl";
+
+// Deliberately not translated. This is a sample of the kind of document the
+// tool analyses, and the analysis is English-only — showing it in Spanish
+// would imply a capability the model does not have (D-013).
 const DOCUMENT_EXCERPT = `4.2 Refunds. Once a returned item passes inspection, refunds are issued to the
 original payment method within 5-7 business days. Store credit is issued
 immediately at the time of inspection, before the refund itself completes,
@@ -27,36 +32,33 @@ function Note({ children, className = "" }: { children: React.ReactNode; classNa
 }
 
 export function ProblemEvidenceBoard() {
+  const t = useTranslations("landing");
+
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-24">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="font-display text-4xl font-black text-text md:text-5xl">
-          Retrieval failures don&rsquo;t announce themselves.
+          {t("problemHeading")}
         </h2>
-        <p className="mt-4 text-lg text-text-muted">
-          The passage is in the document. The search doesn&rsquo;t bring it back. And nothing
-          tells you why — until you see the cut.
-        </p>
+        <p className="mt-4 text-lg text-text-muted">{t("problemBody")}</p>
       </div>
 
       <div className="relative mx-auto mt-20 max-w-6xl">
         <div className="hidden md:absolute md:top-4 md:left-4 md:block md:w-52">
           <Note className="-rotate-2">
-            The cut falls right here, mid-sentence — half of &ldquo;regardless of the original
-            payment method&rdquo; ends up in the next chunk.
+            {t("problemNoteCut")}
           </Note>
         </div>
 
         <div className="hidden md:absolute md:top-44 md:right-4 md:block md:w-52">
           <Note className="rotate-1">
-            This chunk is already ~1,100 characters — the model truncates around 1,000, so the
-            customs note never gets embedded.
+            {t("problemNoteTruncation")}
           </Note>
         </div>
 
         <div className="rounded-lg border border-text/10 bg-panel-inset-bg p-6 md:mx-auto md:max-w-xl md:p-8">
           <p className="mb-3 text-xs tracking-wide text-text-muted">
-            example document (synthetic) — refund policy
+            {t("problemExcerptCaption")}
           </p>
           <p className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-text/90">
             {DOCUMENT_EXCERPT}
@@ -65,8 +67,7 @@ export function ProblemEvidenceBoard() {
 
         <div className="mt-6 flex justify-center md:mt-8">
           <Note className="rotate-2 md:w-72">
-            No blank line between &ldquo;4.2 Refunds&rdquo; and &ldquo;4.3&rdquo; → paragraph
-            chunking collapses both sections into one giant chunk.
+            {t("problemNoteParagraph")}
           </Note>
         </div>
       </div>

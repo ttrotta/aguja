@@ -13,7 +13,7 @@ export type {
   Tokens,
   NonTokenStrategy,
 } from "./strategy";
-export { validateStrategy } from "./strategy";
+export { validateStrategy, type StrategyValidationReason } from "./strategy";
 export { toSegments } from "./segments";
 export { chunkByTokens } from "./tokens";
 export type { TokenSpan } from "./tokens";

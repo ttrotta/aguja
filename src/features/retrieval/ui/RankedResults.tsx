@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { Chunk } from "../../chunking/domain/chunk";
 import type { RankedResult } from "../domain/ranking";
 
@@ -43,6 +44,7 @@ function Pager({
   totalPages: number;
   onChange: (page: number) => void;
 }) {
+  const t = useTranslations("chunkedDocument");
   if (totalPages <= 1) return null;
   return (
     <div className="flex items-center justify-between gap-3">
@@ -52,10 +54,10 @@ function Pager({
         onClick={() => onChange(page - 1)}
         className="rounded-sm border border-text/30 px-3 py-1 text-sm text-text transition-colors hover:border-violet/60 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Previous
+        {t("previous")}
       </button>
       <span className="text-sm text-text-muted">
-        Page {page + 1} of {totalPages}
+        {t("page", { page: page + 1, total: totalPages })}
       </span>
       <button
         type="button"
@@ -63,13 +65,15 @@ function Pager({
         onClick={() => onChange(page + 1)}
         className="rounded-sm border border-text/30 px-3 py-1 text-sm text-text transition-colors hover:border-violet/60 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Next
+        {t("next")}
       </button>
     </div>
   );
 }
 
 export function RankedResults({ results, chunks, selectedIndex, onSelectIndex }: RankedResultsProps) {
+  const t = useTranslations("results");
+  const tChunk = useTranslations("chunkedDocument");
   // Page resets when the ranking itself changes (new query or strategy); it
   // jumps to whichever page holds the selection when the selection changes
   // from elsewhere (e.g. clicking a chunk in the document). Adjusted during
@@ -105,7 +109,7 @@ export function RankedResults({ results, chunks, selectedIndex, onSelectIndex }:
   return (
     <div className="flex flex-col gap-2">
       <h2 className="text-[1.125rem] font-medium leading-none text-text">
-        {results.length} result{results.length === 1 ? "" : "s"}, ranked by similarity
+        {t("heading", { count: results.length })}
       </h2>
       <Pager page={currentPage} totalPages={totalPages} onChange={setPage} />
       <ol className="flex flex-col gap-1">
@@ -128,14 +132,17 @@ export function RankedResults({ results, chunks, selectedIndex, onSelectIndex }:
                 <span className="flex items-center gap-2">
                   <span className="text-text/50">#{result.rank}</span>
                   <span>
-                    chunk {chunk.index} · [{chunk.start}, {chunk.end})
+                    {t("chunkLabel", { index: chunk.index, start: chunk.start, end: chunk.end })}
                   </span>
                   {result.truncated && (
                     <span
-                      title={`${result.totalTokens - result.tokenCount} of ${result.totalTokens} tokens were not embedded`}
+                      title={t("truncatedTitle", {
+                        dropped: result.totalTokens - result.tokenCount,
+                        total: result.totalTokens,
+                      })}
                       className="rounded-full border border-warning/60 px-2 py-0.5 text-xs text-warning"
                     >
-                      truncated — {result.tokenCount}/{result.totalTokens} tokens
+                      {t("truncatedBadge", { embedded: result.tokenCount, total: result.totalTokens })}
                     </span>
                   )}
                 </span>
@@ -152,8 +159,12 @@ export function RankedResults({ results, chunks, selectedIndex, onSelectIndex }:
       {selectedChunk && (
         <div className="border-t-2 border-violet pt-3 text-sm">
           <p className="font-medium text-text/80">
-            Chunk #{selectedChunk.index} — [{selectedChunk.start}, {selectedChunk.end}) —{" "}
-            {selectedChunk.length} characters
+            {tChunk("chunkDetail", {
+              index: selectedChunk.index,
+              start: selectedChunk.start,
+              end: selectedChunk.end,
+              length: selectedChunk.length,
+            })}
           </p>
           <p className="mt-1 whitespace-pre-wrap break-words text-text">
             {selectedChunk.text.length > PREVIEW_LENGTH

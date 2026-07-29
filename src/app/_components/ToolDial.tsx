@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 type Tool = {
   id: string;
-  label: string;
   kind: "real" | "soon";
 };
 
@@ -12,12 +12,12 @@ type Tool = {
 // a visible "there's more coming" without promising a specific roadmap item
 // PRODUCT.md hasn't confirmed.
 const TOOLS: Tool[] = [
-  { id: "chunks", label: "Chunk Inspector", kind: "real" },
-  { id: "compare", label: "Strategy Comparison", kind: "real" },
-  { id: "queries", label: "Query Sensitivity", kind: "real" },
-  { id: "confusable", label: "Confusable Chunks", kind: "real" },
-  { id: "soon-1", label: "Coming soon", kind: "soon" },
-  { id: "soon-2", label: "Coming soon", kind: "soon" },
+  { id: "chunks", kind: "real" },
+  { id: "compare", kind: "real" },
+  { id: "queries", kind: "real" },
+  { id: "confusable", kind: "real" },
+  { id: "soon-1", kind: "soon" },
+  { id: "soon-2", kind: "soon" },
 ];
 
 const AUTO_ADVANCE_MS = 3500;
@@ -94,10 +94,11 @@ function ConfusablePreview() {
 }
 
 function SoonPreview() {
+  const t = useTranslations("toolDial");
   return (
     <div className="flex flex-col items-center gap-2">
       <span className="h-8 w-8 rounded-full border border-dashed border-text/25" />
-      <span className="text-[10px] text-text-muted">Coming soon</span>
+      <span className="text-[10px] text-text-muted">{t("comingSoon")}</span>
     </div>
   );
 }
@@ -119,6 +120,15 @@ function ToolPreview({ tool }: { tool: Tool }) {
 }
 
 export function ToolDial() {
+  const t = useTranslations("toolDial");
+  const tTools = useTranslations("tools");
+
+  // "Coming soon" slots share one label; the real ones read their name from
+  // the same catalogue entry the sidebar and navigation use.
+  function labelFor(tool: Tool): string {
+    return tool.kind === "soon" ? t("comingSoon") : tTools(tool.id);
+  }
+
   const [activeIndex, setActiveIndex] = useState(0);
   const [userInteracted, setUserInteracted] = useState(false);
 
@@ -155,7 +165,7 @@ export function ToolDial() {
     <div className="flex flex-col items-center gap-4">
       <div
         role="listbox"
-        aria-label="Aguja tools"
+        aria-label={t("ariaLabel")}
         tabIndex={0}
         onKeyDown={handleKeyDown}
         className="flex h-[520px] w-[520px] shrink-0 flex-col gap-3 rounded-3xl border border-text/10 bg-panel-bg/40 p-4 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet focus-visible:outline-offset-4"
@@ -175,7 +185,7 @@ export function ToolDial() {
           <p
             className={`relative text-2xl font-semibold tracking-wide ${activeTool.kind === "soon" ? "text-text-muted" : "text-text"}`}
           >
-            {activeTool.label}
+            {labelFor(activeTool)}
           </p>
         </div>
         <div className="flex items-center justify-center gap-2">
@@ -186,7 +196,7 @@ export function ToolDial() {
                 key={tool.id}
                 type="button"
                 tabIndex={-1}
-                aria-label={tool.label}
+                aria-label={labelFor(tool)}
                 aria-selected={isActive}
                 role="option"
                 onClick={() => {
@@ -208,7 +218,7 @@ export function ToolDial() {
           })}
         </div>
       </div>
-      <p className="text-xs text-text-muted">Choose a tool, or use the arrow keys.</p>
+      <p className="text-xs text-text-muted">{t("hint")}</p>
     </div>
   );
 }
