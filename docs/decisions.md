@@ -452,3 +452,100 @@ through a confident-sounding label.
 reachable from `chunks[pairIndex].text` in the caller, so this is a UI requirement, not a domain
 contract change. `lexicalOverlap`'s implementation and tests are unaffected; token-set Jaccard is
 still the chosen measure, just described accurately.
+
+---
+
+## D-013 — Ship a bilingual interface over an English-only analysis
+
+**Date**: 2026-07-29 · **Status**: Accepted · **Supersedes**: FR-035 (spec 002)
+
+**Context.** FR-035 requires that "all interface copy across the application MUST be in English",
+and feature 002 implemented it — the last Spanish strings on the landing page were translated in
+its final phase (T029–T030). The request now is the opposite: serve the interface at `/es` and
+`/en`, with a switcher.
+
+The conflict is not only with FR-035. D-006 chose `all-MiniLM-L6-v2` and accepted an English-only
+*tool*, reasoning that the target user debugs "overwhelmingly English" technical documentation;
+FR-026 requires the interface to say that non-English documents produce untrustworthy scores.
+Today that statement is a tooltip on a small "i" button in `ModelStatus`. That is adequate while
+every other word on screen is also English, because the user has no particular reason to expect
+otherwise.
+
+A fully Spanish interface removes that reason. Someone landing on `/es` sees their own language
+everywhere and draws the obvious inference: this tool works in Spanish. It does not. Translating
+the interface and changing nothing else would manufacture precisely the misunderstanding FR-026
+exists to prevent.
+
+**Decision.** Separate the two ideas explicitly: **interface language and analysis language are
+different things.** The interface ships in Spanish and English; the analysis stays English-only,
+on the same model D-006 chose. FR-035 is superseded — interface copy MUST be available in both
+locales rather than English-only.
+
+The English-only notice stops being a tooltip. It becomes visible, first-class copy wherever a
+document is accepted or scores are shown, written in the reader's own language, and it is most
+prominent on `/es`, where the gap between interface language and analysis language is real.
+
+**Why.** The user this serves was always in scope: a Spanish-speaking developer debugging English
+technical documentation. Their interface language and their corpus language were never the same
+thing. D-006's rationale is about the corpus — the documents the target user pastes — not about
+what language that person prefers to read a button in. Nothing in D-006 is reversed here; it is
+read for what it actually claims.
+
+Product Principle 2 — never hide a failure this tool exists to expose — forces the second half.
+Aguja's entire argument is that invisible retrieval failures should be made visible. Shipping an
+interface that implies Spanish support while quietly producing untrustworthy Spanish scores would
+be exactly that kind of failure, introduced by us, inside the product built to expose it.
+
+**Consequences.** FR-035 is replaced in spec 003. FR-026's notice must be upgraded from a tooltip
+to visible copy, and must itself be translated — a warning about untrustworthy non-English scores
+that only ever appears in English is self-defeating.
+
+Every route moves under a locale segment (`/[locale]/tool/…`), which breaks the twelve hardcoded
+paths in `e2e/` and every internal `<Link>`. That cost is mechanical but real, and it argues for a
+shared route helper rather than twelve literal edits repeated on every future locale change.
+
+The multilingual model (`paraphrase-multilingual-MiniLM-L12-v2`, ~120 MB, 128-token limit) was
+reconsidered here and rejected again. It would make the analysis genuinely multilingual, but at
+roughly five times the download D-002 worked to keep small, and with half the current token
+ceiling — worsening the truncation failure FR-017 exists to surface. Making the analysis
+multilingual remains a constitution amendment and its own decision, never a side effect of
+translating the interface.
+
+---
+
+## D-014 — Add next-intl rather than hand-rolling the message layer
+
+**Date**: 2026-07-29 · **Status**: Accepted
+
+**Context.** D-013 commits to a bilingual interface. CLAUDE.md declares the stack "Fixed —
+substituting anything here needs a constitution amendment plus a new decision entry". Adding a
+library is an addition rather than a substitution, so no amendment is required, but it is still a
+dependency the project did not have and therefore comes through the decision log.
+
+Both options were credible. A hand-rolled message layer — two typed objects and a small lookup
+hook — needs no dependency at all and would comfortably cover the current surface, which is about
+ten components carrying visible copy. `next-intl` brings locale routing, message loading, ICU
+formatting, and typed message keys for the App Router.
+
+**Decision.** Use `next-intl`.
+
+**Why.** The deciding factor is the Docs page, not the buttons. Feature 003 adds long-form
+documentation — a RAG primer, a section per tool with worked examples, a troubleshooting guide,
+and embeddings concepts — in both languages from the start. A hand-rolled dictionary is fine for
+forty short strings and becomes a liability for prose: nothing catches a key that exists in one
+locale and not the other, plurals and interpolation get hand-written, and locale routing has to be
+maintained against App Router conventions by hand. The maintenance burden would land exactly where
+the content is heaviest and hardest to eyeball.
+
+Typed keys are the specific win. With two locales and a large body of documentation, the failure
+mode that matters is silent drift — Spanish text that quietly falls back to English, or a section
+that exists in one language only. Catching that at compile time is worth one dependency.
+
+**Consequences.** `next-intl` joins the stack; CLAUDE.md's stack section is updated to name it.
+Route structure follows its conventions, which is what drives the `/[locale]/…` restructure in
+D-013's consequences. The e2e suite's paths change with it, and a shared route helper keeps that
+from recurring.
+
+This is a UI-layer dependency only. Principle III still forbids any framework import under a
+`domain/` folder, and nothing about message formatting belongs there — the domain keeps taking
+plain data and returning plain data, and no chunking or similarity code becomes locale-aware.

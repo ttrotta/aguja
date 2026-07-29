@@ -11,14 +11,19 @@ for the session (v2's contribution; v1 shipped a single combined chunking+retrie
 `/tool` before the suite split it apart). Features under `src/features/` are `chunking`,
 `retrieval`, `comparison`, `sensitivity`, `confusability`, `documents`, and `sharing`.
 
+**v3 is specified but not built.** `specs/003-bilingual-shell-docs/spec.md` adds a Spanish and an
+English interface at their own addresses, a documentation page, grouped tool navigation, and a
+footer. Nothing in it exists in `src/` yet; `plan.md` is the next artifact for it.
+
 Read before doing anything:
 
 | File | Authority |
 |---|---|
-| `.specify/memory/constitution.md` | Binding principles. Wins over every other artifact. Currently 1.1.0. |
+| `.specify/memory/constitution.md` | Binding principles. Wins over every other artifact. Currently 1.2.0. |
 | `specs/001-rag-chunking-debugger/spec.md` | What v1 does — user stories P1–P4, FR-001…FR-026, SC-001…SC-010 |
 | `specs/002-rag-tool-suite/spec.md` | What v2 adds — user stories P1–P3, FR-027…FR-053, SC-011…SC-019 |
-| `docs/decisions.md` | Why it is built this way. Append-only, D-001…D-012. |
+| `specs/003-bilingual-shell-docs/spec.md` | What v3 adds — user stories P1–P3, FR-054…FR-075, SC-020…SC-028 |
+| `docs/decisions.md` | Why it is built this way. Append-only, D-001…D-014. |
 | `PRODUCT.md` · `DESIGN.md` | Product truth and the visual system. DESIGN.md wins on visual decisions. |
 
 Spec Kit is installed; skills live in `.claude/skills/speckit-*`. The flow is constitution →
@@ -30,9 +35,10 @@ Commands: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test` (
 ## Stack
 
 Next.js (App Router), TypeScript, Tailwind CSS, pnpm. Transformers.js running
-`Xenova/all-MiniLM-L6-v2` quantized for in-browser embeddings. Vitest for unit tests, Playwright
-for end-to-end. Deployed on Vercel. Fixed — substituting anything here needs a constitution
-amendment plus a new decision entry.
+`Xenova/all-MiniLM-L6-v2` quantized for in-browser embeddings. next-intl for interface copy only
+(D-014) — it arrives with feature 003 and must never reach a `domain/` folder. Vitest for unit
+tests, Playwright for end-to-end. Deployed on Vercel. Fixed — substituting anything here needs a
+constitution amendment plus a new decision entry.
 
 ## Architecture rules (from D-004)
 
@@ -66,8 +72,13 @@ These were chosen with reasons recorded in `docs/decisions.md`. Do not "fix" the
   embeddings and tokenizer the one loaded model already provides.
 - **Chunk visualization must stay independently shippable.** It was v1's P1 and both halves did
   ship; if scope ever tightens again, retrieval is what gets cut, never the reverse (D-003).
-- **English-only, by choice** (D-006). The model was picked for a small first-visit download, not
-  for quality or language coverage. Non-English scores are not trustworthy and the UI must say so.
+- **English-only *analysis*, by choice** (D-006). The model was picked for a small first-visit
+  download, not for quality or language coverage. Non-English scores are not trustworthy and the
+  UI must say so.
+- **Interface language ≠ analysis language** (D-013). The interface ships in Spanish and English;
+  the analysis stays English-only. A translated interface asserts capability just by existing, so
+  the English-only limit must be stated in the language being read and be visible without hovering
+  — not a tooltip. Never let localisation reach a `domain/` folder.
 - **Cosine similarity alone does not mean duplication** (D-011), and lexical overlap only
   separates paraphrase from literal duplication — it does not separate a one-word contradiction
   from a true duplicate, since both share nearly all their wording (D-012). Confusable Chunks

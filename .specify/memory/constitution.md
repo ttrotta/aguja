@@ -1,6 +1,49 @@
 <!--
-Sync Impact Report — 1.1.0 (2026-07-28)
+Sync Impact Report — 1.2.0 (2026-07-29)
 =======================================
+Version change: 1.1.0 → 1.2.0
+Bump rationale: MINOR. Existing guidance materially expanded — the fixed stack
+                gains a localisation entry, the English-only paragraph now covers
+                the case where interface language and analysis language differ,
+                and the scope list gains an "Added in v3" entry. No principle was
+                added, removed, or redefined; Principle V is untouched and the
+                analysis remains English-only.
+
+Sections changed:
+  - Technology Constraints — stack list gains Localisation (next-intl, interface
+    copy only); the English-only paragraph is extended to state that a translated
+    interface MUST declare the analysis limit in the language being read, and
+    visibly rather than by tooltip; scope list gains "Added in v3".
+
+Reasoning recorded in: docs/decisions.md D-013 (interface language is not
+analysis language; supersedes FR-035) and D-014 (adding next-intl to a stack this
+section declares fixed). Both are required by the amendment procedure, since
+Technology Constraints was touched.
+
+Why the English-only paragraph needed expanding: it already said the interface
+MUST NOT imply the model handles non-English text. Read in a wholly English
+interface that was sufficient. Read in a Spanish interface it is not, because a
+reader seeing their own language everywhere draws the opposite conclusion from
+the interface itself, without any single sentence having claimed it. The
+prohibition is unchanged; what is new is saying what satisfies it once the
+interface is translated.
+
+Template consistency:
+  ✅ .specify/templates/plan-template.md   — Constitution Check gate reads this
+                                             file at plan time; no edit needed
+  ✅ .specify/templates/spec-template.md   — unaffected by a scope-list change
+  ✅ .specify/templates/tasks-template.md  — unaffected
+  ✅ CLAUDE.md                             — updated in the same change: stack
+                                             section names next-intl, and the
+                                             constraints section carries D-013's
+                                             interface/analysis language
+                                             distinction
+  ✅ specs/003-bilingual-shell-docs/spec.md — its Dependencies section recorded
+                                             this amendment as owed; now paid
+
+Deferred TODOs: none
+
+---- Previous report (1.1.0) ----
 Version change: 1.0.0 → 1.1.0
 Bump rationale: MINOR. Existing guidance materially expanded — the Technology
                 Constraints scope section now covers v2 alongside v1, and states
@@ -178,6 +221,7 @@ The stack is fixed and MUST NOT be substituted without an amendment and a new en
 
 - **Framework**: Next.js (App Router) with TypeScript
 - **Styling**: Tailwind CSS
+- **Localisation**: next-intl, for interface copy only (D-014)
 - **Inference**: Transformers.js running `Xenova/all-MiniLM-L6-v2`, quantized (D-006)
 - **Testing**: Vitest for unit tests, Playwright for end-to-end
 - **Package manager**: pnpm
@@ -186,6 +230,15 @@ The stack is fixed and MUST NOT be substituted without an amendment and a new en
 The embedding model is English-only by deliberate choice. Non-English documents will
 produce scores, but those scores are not meaningful, and the interface MUST NOT imply
 otherwise.
+
+Interface language and analysis language are separate concerns (D-013). The interface MAY
+be offered in a language the model cannot analyse. Where it is, the limit MUST be stated
+in the language being read, and MUST be visible without hovering or expanding — a
+translated interface asserts capability by its own existence, so the correction has to be
+at least as visible as the claim. Localisation MUST NOT reach the domain layer: chunking,
+similarity, and ranking take plain data and return plain data regardless of what language
+the reader sees, which Principle III already requires and this section restates because
+translation is the obvious way to violate it by accident.
 
 The scope boundaries below are decisions, not a backlog. Implementing anything in the
 **Out** list requires an amendment:
@@ -198,6 +251,10 @@ The scope boundaries below are decisions, not a backlog. Implementing anything i
   tools share one pasted document and one embedder instance for the lifetime of a
   session; query-sensitivity analysis across several phrasings of one question;
   a near-duplicate map over chunk embeddings.
+- **Added in v3** (D-013, D-014): a Spanish and an English interface, each at its own
+  address, over an unchanged English-only analysis; a documentation page covering what
+  RAG is, what each tool measures, a troubleshooting path, and the concepts underneath;
+  grouped tool navigation and a footer carrying the privacy guarantee and provenance.
 - **Out**: file upload of any kind (PDF, Word, Markdown); semantic chunking; saved
   sessions; user accounts; comparing more than two strategies at once; persistence
   across page reloads; and any tool requiring generative or second-model inference —
@@ -250,4 +307,4 @@ that was rejected — and an unjustifiable violation blocks the plan.
 `CLAUDE.md` carries runtime guidance for AI agents working in this repository and MUST
 be kept consistent with this document.
 
-**Version**: 1.1.0 | **Ratified**: 2026-07-25 | **Last Amended**: 2026-07-28
+**Version**: 1.2.0 | **Ratified**: 2026-07-25 | **Last Amended**: 2026-07-29
