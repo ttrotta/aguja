@@ -3,17 +3,27 @@
 Aguja is a debugger for retrieval systems: paste a document, see how it is split into chunks,
 run a query, see which chunks come back with scores and ranks.
 
-**v1 and v2 are both built and shipped.** The application lives under `src/`. The landing page is
-at `/`; `/tool` redirects into a shared tool session with four sibling routes — `/tool/chunks`
-(chunk inspection), `/tool/compare` (strategy comparison), `/tool/queries` (query sensitivity),
-and `/tool/confusable` (confusable chunks) — all sharing one pasted document and one loaded model
-for the session (v2's contribution; v1 shipped a single combined chunking+retrieval view under
-`/tool` before the suite split it apart). Features under `src/features/` are `chunking`,
-`retrieval`, `comparison`, `sensitivity`, `confusability`, `documents`, and `sharing`.
+**v1, v2 and v3 are all built and shipped.** The application lives under `src/`.
 
-**v3 is specified but not built.** `specs/003-bilingual-shell-docs/spec.md` adds a Spanish and an
-English interface at their own addresses, a documentation page, grouped tool navigation, and a
-footer. Nothing in it exists in `src/` yet; `plan.md` is the next artifact for it.
+Every route sits under a locale segment (v3): `/[locale]` is the landing page, `/[locale]/docs`
+the documentation, and `/[locale]/tool` redirects into a shared tool session with four sibling
+routes — `tool/chunks` (chunk inspection), `tool/compare` (strategy comparison), `tool/queries`
+(query sensitivity), `tool/confusable` (confusable chunks). Those four share one pasted document
+and one loaded model for the session (v2's contribution; v1 shipped a single combined
+chunking+retrieval view under `/tool` before the suite split it apart). A request naming no locale
+redirects to the default, so addresses bookmarked from v2 still work.
+
+Features under `src/features/` are `chunking`, `retrieval`, `comparison`, `sensitivity`,
+`confusability`, `documents`, `sharing`, `localization`, and `documentation`. Interface copy lives
+in `src/messages/{en,es}.json`; next-intl configuration in `src/i18n/`; locale negotiation in
+`src/proxy.ts` (Next 16 renamed this file convention from `middleware`).
+
+**The tool session lives at module scope, not in React state** (`src/app/[locale]/tool/_components/
+sessionStore.ts` and `src/features/retrieval/embedding/embedderStore.ts`). This is load-bearing,
+not stylistic: the locale segment sits above the tool layout, so switching language remounts the
+provider and would otherwise destroy the pasted document and tear down the embedder worker. The
+worker is created on first use and never terminated — never at module import, which would start a
+23 MB download for visitors who only see the landing page.
 
 Read before doing anything:
 
@@ -31,6 +41,11 @@ specify → plan → tasks → implement.
 
 Commands: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test` (Vitest),
 `pnpm test:domain`, `pnpm test:e2e` (Playwright). Do not invent others.
+
+Vitest runs three projects: `domain` (Node, no DOM — enforces Principle III at runtime),
+`component` (jsdom), and `messages` (catalogue parity). `pnpm test` runs all three.
+`pnpm typecheck` is load-bearing beyond hygiene: it is what enforces documentation parity between
+locales, since each locale exports a record keyed by a shared section-id union.
 
 ## Stack
 

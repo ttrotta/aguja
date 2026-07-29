@@ -101,10 +101,16 @@ literal, so a future locale change touches one file (contracts/localization.md).
 
 ## Owed before this is done
 
-1. **The RAG primer must be checked against current sources**, not written from memory. Recorded as
-   an assumption in the specification and as an open item in research.md.
-2. **Confirm the real worker survives a locale switch**, not only the module-scope stand-in the
-   probe used. Verify directly on the first tool built on the refactored session.
-3. **Read both languages against each other.** Types guarantee every section and key exists in
-   both; nothing guarantees the Spanish says what the English says. That review is human and has no
-   automated substitute.
+All three are settled.
+
+1. ~~The RAG primer must be checked against current sources~~ — checked while writing it (T053).
+   Two figures came from that search rather than from memory and changed what the primer says:
+   chunking moves recall by around 9% on the same corpus, more than swapping the embedding model;
+   and the 256-token ceiling is low even against older models, which typically stop at 512.
+2. ~~Confirm the real worker survives a locale switch~~ — confirmed against the running
+   application, not the probe: the pasted document survived and model requests stayed at 15 across
+   the switch rather than growing.
+3. ~~Read both languages against each other~~ — done. Structural parity is exact (same block kinds
+   in the same order, same example-row, step and list counts, matching callout tones), and every
+   numeric claim appears in both with locale-appropriate formatting. Meaning was reviewed by
+   reading; that part has no automated substitute and never will.
