@@ -26,6 +26,14 @@
   --color-violet-glow: rgba(122, 63, 194, 0.35);
 }
 
+:root.light .theme-logo-dark {
+  display: none !important;
+}
+
+:root:not(.light) .theme-logo-light {
+  display: none !important;
+}
+
 @theme inline {
   --color-page-bg: var(--color-page-bg);
   --color-panel-bg: var(--color-panel-bg);
