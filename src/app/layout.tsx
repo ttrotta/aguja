@@ -17,7 +17,7 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  title: "Aguja",
+  title: "Aguja - RAG Debugger",
   description: "A debugger for retrieval systems: chunk a document, run a query, see what ranks.",
 };
 

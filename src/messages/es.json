@@ -180,10 +180,7 @@
   },
   "footer": {
     "privacy": "Todo corre en tu navegador. Ningún documento que pegues sale de tu dispositivo — no hay servidor al que mandarlo, ni cuenta, ni API key.",
-    "builtWith": "Construido con",
-    "model": "Xenova/all-MiniLM-L6-v2 — Apache-2.0",
-    "transformers": "Transformers.js — Apache-2.0",
-    "next": "Next.js — MIT",
-    "source": "Código en GitHub"
+    "openSource": "Open source en GitHub",
+    "tagline": "Hecho con cariño para la comunidad open source."
   }
 }

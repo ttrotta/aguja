@@ -180,10 +180,7 @@
   },
   "footer": {
     "privacy": "Everything runs in your browser. No document you paste ever leaves your device — there is no server to send it to, no account, and no API key.",
-    "builtWith": "Built with",
-    "model": "Xenova/all-MiniLM-L6-v2 — Apache-2.0",
-    "transformers": "Transformers.js — Apache-2.0",
-    "next": "Next.js — MIT",
-    "source": "Source on GitHub"
+    "openSource": "Open source on GitHub",
+    "tagline": "Made with care for the open source community."
   }
 }
