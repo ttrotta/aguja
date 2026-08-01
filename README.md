@@ -1,8 +1,8 @@
-<p align="center">
-  <img src="public/logo-aguja.png" alt="Aguja — debugger for RAG retrieval" width="560" />
-</p>
-
 # Aguja — a debugger for the retrieval half of RAG
+
+<p align="center">
+  <img src="public/logo_aguja.png" alt="Aguja — debugger for RAG retrieval" width="560" />
+</p>
 
 **Paste a document, run a query, and see exactly why a passage does or doesn't come back.**
 Aguja shows you the chunks your RAG pipeline produces, the strategy that cut them, and the
