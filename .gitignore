@@ -35,3 +35,5 @@ blob-report/
 *.swp
 .idea/
 .vscode/
+
+.atl
