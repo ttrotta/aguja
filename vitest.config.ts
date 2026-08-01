@@ -38,6 +38,21 @@ export default defineConfig({
           include: ["src/messages/**/*.test.ts"],
         },
       },
+      {
+        // Same reasoning as "messages", applied to colour: token contrast is
+        // neither domain logic nor a component, and it is the only thing that
+        // can hold the AA floor permanently rather than once. Folding it into
+        // "domain" would dilute what that project's name asserts.
+        //
+        // It earns its own project because a checklist did not work: the light
+        // theme's secondary text shipped below AA against all four of its
+        // surfaces and survived three features that way.
+        test: {
+          name: "theme",
+          environment: "node",
+          include: ["src/app/theme/**/*.test.ts"],
+        },
+      },
     ],
   },
 });

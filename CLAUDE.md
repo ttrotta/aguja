@@ -42,8 +42,9 @@ specify → plan → tasks → implement.
 Commands: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test` (Vitest),
 `pnpm test:domain`, `pnpm test:e2e` (Playwright). Do not invent others.
 
-Vitest runs three projects: `domain` (Node, no DOM — enforces Principle III at runtime),
-`component` (jsdom), and `messages` (catalogue parity). `pnpm test` runs all three.
+Vitest runs four projects: `domain` (Node, no DOM — enforces Principle III at runtime),
+`component` (jsdom), `messages` (catalogue parity), and `theme` (`src/app/theme/`, WCAG contrast
+invariants over the design tokens — Node, plain arithmetic, no DOM). `pnpm test` runs all four.
 `pnpm typecheck` is load-bearing beyond hygiene: it is what enforces documentation parity between
 locales, since each locale exports a record keyed by a shared section-id union.
 
