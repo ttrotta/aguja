@@ -9,7 +9,8 @@
     "toolsMenu": "Abrir el menú de herramientas"
   },
   "landing": {
-    "heroBody": "Un debugger para retrieval. Pegá un documento, mirá dónde caen los cortes y entendé de una vez por qué esa frase no aparece.",
+    "heroTitle": "RAG Debugger",
+    "heroBody": "Pegá un documento, mirá dónde caen los cortes y entendé de una vez por qué esa frase no aparece.",
     "problemHeading": "Los fallos de retrieval no avisan.",
     "problemBody": "El pasaje está en el documento. La búsqueda no lo trae. Y nada te dice por qué — hasta que ves el corte.",
     "problemNoteCut": "El corte cae justo acá, en medio de la frase — la mitad de \"regardless of the original payment method\" queda en el chunk siguiente.",

@@ -9,7 +9,8 @@
     "toolsMenu": "Open the tools menu"
   },
   "landing": {
-    "heroBody": "A debugger for retrieval. Paste a document, see where the cuts fall, and finally understand why that sentence doesn't show up.",
+    "heroTitle": "RAG Debugger",
+    "heroBody": "Paste a document, see where the cuts fall, and finally understand why that sentence doesn't show up.",
     "problemHeading": "Retrieval failures don't announce themselves.",
     "problemBody": "The passage is in the document. The search doesn't bring it back. And nothing tells you why — until you see the cut.",
     "problemNoteCut": "The cut falls right here, mid-sentence — half of \"regardless of the original payment method\" ends up in the next chunk.",
