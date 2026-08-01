@@ -549,3 +549,687 @@ from recurring.
 This is a UI-layer dependency only. Principle III still forbids any framework import under a
 `domain/` folder, and nothing about message formatting belongs there — the domain keeps taking
 plain data and returning plain data, and no chunking or similarity code becomes locale-aware.
+
+---
+
+## D-015 — Give the landing a dot field shaped by the needle, not a map
+
+**Date**: 2026-07-30 · **Status**: Superseded by D-016
+
+**Context.** `DESIGN.md` lists "never a flat single-plane background" as a Key Characteristic of
+the visual system, but the landing had been exactly that flat plane since it shipped. The reference
+image that prompted fixing this rendered its dot texture as a world map — a recognisable, low-effort
+way to make a dotted background feel intentional.
+
+**Decision.** Add a dot-matrix background to the landing page only, shaped by the needle-and-thread
+motif (a soft clearing where the thread passes through the field) rather than by any
+representational silhouette. Excluded from the tool suite, which the design system governs as an
+Operate-mode surface where "the task always outranks the atmosphere," and from the documentation
+and research pages, reasoned as Read-mode surfaces where texture behind sustained prose works
+against comprehension (spec 004 research.md R-006).
+
+**Why.** A world map means nothing here — Aguja is a retrieval debugger, nothing about it is
+geographic, and a map would be the only element on the page that carries no meaning. The product
+already owns a motif with meaning; shaping the field with it costs no more than sourcing a
+silhouette asset while actually saying something true. The tool and reading-surface exclusions
+followed directly from principles the design system had already committed to elsewhere, not new
+reasoning invented for this feature.
+
+**Consequences.** Implemented as a single repeating `radial-gradient`, dot alpha 0.06, applied via a
+`.dot-field` class scoped to the landing's `<main>`. A companion correction was required first: the
+light theme's secondary text measured below WCAG AA against every one of its surfaces, independent
+of this feature, and the field would have buried that defect further rather than exposing it —
+`--color-text-muted`'s light-theme alpha was raised 0.62 → 0.72 before the field shipped.
+
+Shipped complete — field, clearing, tests, both themes — and rejected on sight by the user once
+rendered. Superseded below the same day, before this entry could describe anything still true of
+the codebase.
+
+---
+
+## D-016 — Take the dot field site-wide, bigger and irregular, drop the clearing
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-015
+
+**Context.** D-015 shipped, passed every automated check, and was rejected on sight: the user found
+the clearing unconvincing and the dots too small to register, in either theme. Separately, and in
+the same conversation, they asked for the field to reach the tool suite, the documentation, and the
+research pages — reversing D-015's own exclusions — "quiero que tenga impacto."
+
+**Decision.** Three changes, made together:
+
+1. Revert the clearing entirely. `BigNeedle` carries no clearing element; the needle-and-thread
+   motif is exactly what it was before this feature touched it.
+2. Redraw the field as an irregular, hand-placed pattern of circles of varying radius (an inline
+   SVG tile, not a uniform `radial-gradient` grid), at roughly three times the previous opacity
+   (0.06 → 0.18).
+3. Move the field from a landing-scoped `.dot-field` class to the `body` element directly, so every
+   route carries it. Within the tool suite specifically, this means only `page-bg` — the margin
+   around the tool's floating panel — carries the field; the panel itself and everything inside it
+   (already opaque `panel-bg`/`panel-inset-bg` surfaces) continue to occlude it fully, which is what
+   keeps Operate mode's "task outranks atmosphere" true for the surface where the actual work
+   happens. Only where page-bg was already visible, and already meant nothing, does it now carry
+   texture.
+
+**Why.** The clearing's rejection was a craft judgement made from looking at it rendered, not a
+requirement anyone could have specified in advance — recorded here rather than re-litigated. The
+scope reversal is different in kind: D-015's tool and reading-surface exclusions were this
+feature's own reasoning (R-006), not a constitution-level rule, and the user weighed that reasoning
+against wanting visual presence across the product and chose presence. Scoping the field to
+`page-bg` within `/tool` rather than reverting the exclusion outright was this session's proposal,
+not the user's explicit instruction — it is the version of "reach the tool suite" that adds
+visual identity without touching the instrument panel Operate mode is actually protecting, and nothing
+about the panel's own restraint changes.
+
+The heavier field (0.18 alpha, larger dots) still had to clear the WCAG floor its own predecessor
+established: measured up to roughly 0.20 before secondary text sitting on a dot pixel drops below
+4.5:1 in either theme, so 0.18 ships with real, verified margin rather than a value chosen by eye
+and hoped to be safe.
+
+**Consequences.** `--color-dot-clear` and the `.dot-field` class are removed as dead code; the field
+lives in `globals.css`'s `body` rule via a new `--dot-pattern` token (one hand-authored SVG data URI
+per theme, colour baked in to match `--color-dot` exactly — the two must be kept in sync by hand if
+either changes, which is recorded as a comment at the token, not only here). `spec.md`'s FR-085,
+FR-086, and SC-036 are marked superseded in place by FR-103–FR-107 rather than deleted, so the
+document still shows what was originally specified and why it changed. The `theme` test project's
+C-3 and C-6 invariants were re-verified against the new alpha before it shipped, not after.
+
+---
+
+## D-017 — Halftone grid, not scattered positions: dot randomness is size, not placement
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-016 on pattern technique only
+
+**Context.** D-016 shipped a hand-placed SVG of circles at irregular positions *and* irregular
+sizes — the most literal reading of "random pattern" available at the time. Rejected again, the
+same day, against a second reference image: a halftone-style texture where dots sit on a visibly
+regular, aligned grid and only their radius varies, producing rounded blob shapes against a field
+of small uniform dots. The user's own words made the distinction explicit: *"que los puntos estén
+alineados... no sea random [la posición]... pero que hagas formas random jugando con los tamaños."*
+D-016's site-wide scope reversal (FR-103, FR-104) is untouched by this entry — only the pattern
+technique changes.
+
+**Decision.** Rebuild the SVG tile as a regular grid (22×11 cells, 12px spacing) where every dot
+sits at a fixed grid position and only its radius varies — computed from proximity to four fixed
+"seed" points using a distance falloff, so radius grows smoothly toward each seed and shrinks to a
+1.7px floor away from all of them. This is what produces the rounded, halftone-style blobs; a
+purely random per-cell radius would read as static, not shape.
+
+**Why.** Two rejections in one day are not two unrelated misses — they share a root cause: neither
+this session nor the first amendment separated "randomness" into its two independent components,
+position and size, and defaulted to varying both at once because that was the more literal reading
+of the request. The user's correction on the second pass made the actual distinction explicit,
+and it holds up on inspection of both reference images: what reads as organic in a halftone texture
+is the *size* gradient, not scattered placement — the grid alignment is part of what makes it read
+as a controlled effect rather than noise.
+
+**Consequences.** `--dot-pattern`'s two SVGs (dark/light) are regenerated; tile size grows from
+120×120 (14 hand-placed circles) to 264×132 (242 grid-computed circles), and `background-size` in
+`globals.css`'s `body` rule changes to match. `--color-dot`'s alpha moves 0.18 → 0.19 — a value
+computed for the new pattern, not carried over from the old one, though it lands close by
+coincidence. The ~0.20 contrast ceiling from D-016 required no re-derivation: it is a function of
+alpha alone, not of dot radius or position, which was verified rather than assumed before this
+shipped. `spec.md`'s FR-105 and part of SC-036 are marked superseded in place by FR-108, the same
+pattern D-016 used against D-015 — the document keeps showing what was tried and rejected, not only
+what remains true.
+
+---
+
+## D-018 — Irregular coastlines instead of radial blobs; disclose the byte cost
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-017 on blob shape; FR-087's byte
+claim (spec 004)
+
+**Context.** D-017's halftone grid — regular dot positions, radius driven by distance from four
+fixed points — was liked in principle on the same day it shipped: grid alignment and size variation
+were both confirmed as right. What wasn't right was the shape math itself. Distance-based falloff
+from a point is radially symmetric by construction, so every landmass comes out a soft circle. The
+user asked for something "freestyle," like invented continents rather than real ones, and separately
+said the field still read as a visibly repeating tile.
+
+**Decision.** Two changes:
+
+1. Replace radial falloff with an angle-dependent coastline: each landmass's edge radius is
+   perturbed by a small sum of sine harmonics varying with angle, not a constant distance from
+   center. This is what produces bays, peninsulas, and asymmetric edges instead of a circle.
+2. Grow the tile and the landmass count — 22×11 cells (6 landmasses) to 34×17 cells (6 more varied
+   landmasses, no two sharing a harmonic set) — so repetition is not obvious at normal viewport and
+   scroll distances, without abandoning tiling itself (an infinite, non-repeating canvas would need
+   either a fetched asset, which FR-087 rules out, or runtime generation, ruled out earlier on cost
+   and determinism grounds).
+
+Measured, not assumed: the resulting SVGs are 578 circles each, ~20KB raw per theme. Checked against
+`globals.css`'s actual gzip size before shipping — ~9.4KB compressed for both themes' patterns
+combined, which is what a browser actually transfers.
+
+**Why.** The angle-perturbation technique is the standard way to draw an irregular blob outline
+without abandoning a closed, fillable shape — it stays a strict function of angle, so it is exactly
+as cheap to compute per grid cell as the radial version it replaces, at the cost of six numbers
+(three harmonics × frequency/amplitude/phase) per landmass instead of one radius. The size and
+variety increase is aimed at a specific complaint — "no quiero que haya un patrón" — read as being
+about a small motif obviously repeating, not about tiling as a mechanism; FR-087's constraints
+already rule out the alternatives that would make the field truly non-repeating.
+
+Disclosing the byte cost, rather than letting SC-031's original "same bytes" claim quietly become
+false, follows the same practice already applied to the contrast defect (D-011 predecessor spec)
+and the scope reversal (D-016): a claim that turns out untrue on measurement gets corrected in the
+document, not left standing because nobody re-checked it.
+
+**Consequences.** `spec.md` gains FR-109 (irregular coastline), FR-110 (repetition-avoidance
+rationale), and FR-111 (byte disclosure), and marks FR-087 and SC-031 superseded in place on their
+byte claims specifically — "no additional requests" is untouched and still holds. `globals.css`'s
+`--dot-pattern` tile grows from 264×132 to 408×204; `--color-dot`'s alpha (0.19) and the ~0.20
+contrast ceiling both carry over unchanged, since neither depends on shape or tile size. `theme`
+project (63 tests), full suite (188 tests), typecheck, and lint were all re-verified against this
+version before it shipped.
+
+---
+
+## D-019 — Fewer landmasses, real size contrast, genuine empty space
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-018 on landmass count and sizing
+
+**Context.** D-018's six landmasses sat close enough in size (radius 2.6–4.6 cells) and were spread
+widely enough that their influence zones covered most of the tile — measured afterward at over 95%
+of grid cells carrying some size bump. Rejected on sight: "veo como muchas manchas." The complaint
+was density and contrast, not shape — D-018's coastline technique itself was not revisited.
+
+**Decision.** Three landmasses instead of six: one dominant (radius 7.2 cells), one mid-sized (3.6),
+one small (2.0), positioned so their influence zones don't tile the whole grid — large regions carry
+only the 1.5px floor dot, no size influence at all. Measured at 63% of cells now genuinely empty,
+against under 5% before.
+
+Toroidal (wrapping) distance was added at the same time, not requested but required by the larger
+dominant landmass: at radius 7.2 with harmonic amplitude summing to 0.65 in the worst case, its
+coastline can reach nearly 12 cells from center in some direction, which is close enough to the
+34-cell tile width that a non-wrapping distance calculation could clip it hard against a tile edge —
+a visible seam every repeat. Wrapping the delta calculation for both axes fixes this regardless of
+how future landmass placement or sizing changes; it costs nothing extra to compute.
+
+**Why.** "Empty" is not the absence of a requirement — it is now one (FR-112), because the user's
+complaint was specifically about the *ratio* of covered to uncovered space, which no earlier
+requirement in this spec constrained. The size contrast (one dominant landmass against two much
+smaller ones) is what makes "más grande en algunos lados... más vacío en otro" true simultaneously:
+symmetric sizing cannot produce that effect no matter how the individual shapes are drawn.
+
+**Consequences.** `spec.md` gains FR-112 and marks the "Dot field" Key Entity's position/size
+attributes corrected — an earlier pass had left it reading "hand-arranged, not a grid," which
+FR-108 had already made false. `globals.css`'s tile dimensions (408×204) and circle count (578) are
+unchanged — only per-cell radius values differ, so raw/gzipped payload move by rounding error
+(~20.0KB → ~19.95KB raw per theme; ~8.96KB gzipped combined, both themes, down from ~9.4KB). `theme`
+project, full suite, typecheck, and lint re-verified; the served CSS was decoded and its circle
+count and tile size confirmed against the generator's output, not assumed to match.
+
+---
+
+## D-020 — Grow the tile itself: the repeat, not the content, was the complaint
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-019 on tile dimensions
+
+**Context.** D-015 through D-019 all iterated on what the tile *contains* — shape, size, contrast,
+density. None touched the tile's own dimensions, which stayed at roughly 400×200px throughout. The
+user's next report named the actual defect precisely: at a typical desktop viewport width (~1900px),
+a 408px-wide tile repeats horizontally about five times, visible side by side as "5 columns" of
+identical shapes — a complaint about the repeat interval, not about anything the earlier amendments
+had touched.
+
+**Decision.** Grow the tile to 1720×500px (86×25 cells at 20px spacing, up from 408×204px at 12px
+spacing), with seven landmasses — up from three — spread across the full width so the larger canvas
+reads as genuinely varied rather than the same three shapes stretched apart. Real size contrast and
+substantial empty space (D-019's requirement) are preserved: 77% of cells carry no size bump,
+against D-019's 63%.
+
+Measured before committing, not after: three tile-size/spacing candidates were gzip-tested with
+synthetic circle data before any real landmass was designed, specifically to avoid shipping a payload
+number nobody had checked. The chosen configuration (20px spacing, 1720px width) landed at roughly
+double the prior gzip cost for a canvas over four times the area — an easy trade given the actual
+number stayed in the tens of kilobytes, not hundreds.
+
+**Why.** Every prior amendment optimized within a roughly 400px-wide box, which meant the fix could
+never touch the actual complaint: a small tile repeats visibly wherever it's tiled, no matter how
+good any single repeat looks in isolation. Widening the tile to approach real viewport widths is the
+only change that can eliminate side-by-side repetition rather than dressing it up. Vertical
+repetition is deliberately not held to the same bar (FR-113) — it is encountered only while
+scrolling, never compared side by side in one view, and is a materially weaker cue than horizontal
+tiling at typical page heights.
+
+**Consequences.** `spec.md` gains FR-113 (tile width vs. viewport) and FR-114 (byte disclosure must
+be re-measured on every tile-size change, not carried forward — a rule aimed at this decision log
+itself, since D-016 through D-019 each restated a number without flagging that the *next* change
+would invalidate it). SC-031 is corrected again: ~19.75KB gzipped total (`globals.css`), up from
+~8.9KB. `--dot-pattern`'s circle count grows 578 → 2150 per theme. `theme` project, full suite,
+typecheck, and lint re-verified; the served CSS was decoded and its circle count (2150) and tile
+size (1720×500) confirmed against the generator's output before this was reported done.
+
+---
+
+## D-021 — Two tiers: the rich pattern stays landing-only, byte-splitting explicitly declined
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-016 on scope (partially)
+
+**Context.** D-016 through D-020 took the dot field from landing-only to site-wide and iterated on
+what it looked like. Once the field was actually good — the user's own words — the site-wide
+decision itself was reconsidered: the rich pattern should stay exclusive to the landing, and every
+other route (tool, docs, research) should fall back to something small and uniform that doesn't
+compete with reading or working.
+
+**Decision.** Two tiers. `body` carries a small, uniform `radial-gradient` — the exact technique
+this feature started with, before any hand-authored SVG existed — as the default on every route.
+A new class, `.dot-field-landing`, applied only to the landing's `<main>`, overrides that default
+with the rich pattern (`--dot-pattern`, unchanged from D-020).
+
+Reported first with a false claim, corrected before it shipped as fact: the assumption that scoping
+the rich pattern to a class would also stop other routes from *downloading* it. Checked against the
+actual served asset — `globals.css` compiles to one shared chunk, identical bytes, loaded by every
+route regardless of which tier's class that route's markup uses. Next.js does not code-split global
+CSS per route the way it does per-route JavaScript bundles or CSS Modules. Presented as an explicit
+choice rather than silently accepted or silently "fixed": leave the shared bundle as-is (the cost is
+paid once per browser session and cached, not repeated per page view), or move the rich pattern into
+a route-scoped CSS Module to achieve real separation. The user chose to leave it — the visual result
+was what mattered, not the download-splitting benefit this session had mistakenly promised alongside
+it.
+
+A second, real defect surfaced immediately after the first implementation: `.dot-field-landing` set
+`background-image` but not `background-color`. Since `<main>` paints in front of `<body>` and the
+rich pattern's empty regions are the majority of its area (63–77% across D-019/D-020), `body`'s own
+small-dot gradient showed through those gaps — the two tiers visibly mixed on the landing, reported
+directly by the user ("veo una mezcla"). Fixed by giving `.dot-field-landing` its own opaque
+`background-color: var(--color-page-bg)`, matching `body`'s.
+
+**Why.** Splitting "does it look different per route" from "does it download different bytes per
+route" matters because they are genuinely different properties of the same CSS, and conflating them
+is exactly the kind of unverified claim this project's whole practice this session has been to catch
+before it ships, not after — this time it slipped through into an actual assistant message and had
+to be corrected in the open rather than caught before printing it. The opacity defect is the same
+kind of category error in miniature: `background-image` alone was assumed sufficient to "replace"
+what's behind an element, when replacement requires blocking the layer beneath, not just adding a
+layer in front of it.
+
+**Consequences.** `spec.md` gains FR-115 (two-tier split), FR-116 (opacity requirement, closing the
+mixing defect), and FR-117 (bundle-splitting is not assumed — verified false, and declining to fix
+it is recorded as a choice, not an oversight). `globals.css`'s `body` rule reverts to a
+`radial-gradient`, near the original pre-SVG implementation; `.dot-field-landing` is new, applied in
+`src/app/[locale]/page.tsx`. Total file size is essentially unchanged (~19.5KB gzipped) since the
+same two encoded SVGs still live in the same shared stylesheet — only *which routes render them* has
+changed, not what ships to the browser. `theme` project, full suite, typecheck, lint, and the full
+e2e suite were all re-verified; the served HTML was checked directly to confirm `.dot-field-landing`
+appears only on `/en` and not on `/en/tool/chunks`, `/en/docs`, or `/en/news`, and the served CSS
+chunk was confirmed byte-identical across all four routes.
+
+---
+
+## D-022 — Redesign the scroll cue, extend the Earned Glow Rule, and thread the scrollbar
+
+**Date**: 2026-07-30 · **Status**: Accepted
+
+**Context.** Three requests in one message: replace the pill-and-dot scroll cue with something more
+distinctive that goes away after it's used, add a breathing glow along the hero's bottom edge to
+reinforce the cue, and restyle the browser scrollbar to evoke the needle. The first two touch
+`DESIGN.md`'s Earned Glow Rule directly — it currently reserves glow for the thread/needle motif and
+the current selection, and an ambient glow-at-rest along a whole section edge is neither.
+
+**Decision.**
+
+1. **Scroll cue**: a floating violet arrow (`ScrollCue.tsx`, a new client component), animated with
+   a gentle float, dismissed permanently on the visitor's first `scroll` event via a `{ once: true }`
+   listener — no re-appearance on scrolling back to the top. The same "stops after first interaction,
+   never resumes" rule the tool dial's auto-advance already follows.
+2. **Hero glow**: a radial gradient anchored to the bottom-center of the hero, opacity breathing
+   0.3–0.8 on a 4s cycle, built from the existing `--color-violet-glow` token. Extends the Earned
+   Glow Rule explicitly — recorded here and in `DESIGN.md`, not silently treated as already covered.
+3. **Thread scrollbar**: site-wide (not landing-scoped — this is chrome, like the navbar), a violet
+   pill-shaped `::-webkit-scrollbar-thumb` carrying `thread-glow`'s same box-shadow treatment,
+   `scrollbar-color` fallback for Firefox (colour only, no glow — the only tier that browser exposes).
+
+Both new animations were added to the existing `prefers-reduced-motion` block; the old
+`scroll-cue-dot` keyframes and class were deleted rather than left dead once nothing referenced them.
+
+**Why.** A scrollbar cannot be shaped like a bent needle in CSS — the thumb is always a rectangle,
+roundable but not bendable — so "make it look like a needle" is honestly satisfied by making it
+*be* the thread (colour + glow), the same motif already expressed everywhere else violet appears,
+rather than attempting a literal silhouette CSS cannot draw. The glow extension is scoped
+deliberately narrow — one wayfinding moment at the fold, not a general licence — because the whole
+point of the Earned Glow Rule was to keep glow meaning something; extending it everywhere a designer
+later wants emphasis would undo that.
+
+**Consequences.** `spec.md` gains FR-118–FR-122 and SC-038–SC-040 as a scope extension (not a
+rejection-driven amendment — nothing here was shipped and disliked first). `DESIGN.md`'s Earned Glow
+Rule, Landing layout description, and Components section are updated in place; a new "Thread
+Scrollbar" component entry is added. New files: `src/app/_components/ScrollCue.tsx`. Removed:
+`LandingHero.tsx`'s inline `ScrollCue` function and `globals.css`'s `scroll-cue-dot` keyframes/class.
+`theme` project, full suite, typecheck, lint, and the full e2e suite re-verified; the served CSS was
+checked directly for the scrollbar rules, the glow, and the arrow's presence in the landing HTML with
+zero remaining references to the deleted dot cue.
+
+---
+
+## D-023 — Merge the glow into the scroll cue's own dismissal; fix a real animation bug
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-022 on glow shape/lifecycle only
+
+**Context.** D-022 shipped the glow as a standalone element in `LandingHero.tsx`, breathing forever
+regardless of scroll — the arrow dismissed itself, the glow never did. Asked to fix that, shrink the
+glow's height, and widen its spread.
+
+**Decision.** Moved the glow into `ScrollCue.tsx` as a second element sharing the same `dismissed`
+state the arrow already tracks — one invitation, one dismissal, not two independently-timed ones.
+Height `h-48` → `h-32`; gradient shape from an implicit `farthest-corner` ellipse to an explicit
+`ellipse 92% 100% at 50% 100%`, spreading it visibly toward both edges instead of pooling centered.
+
+A real bug surfaced immediately: adding a plain `opacity-0` utility class did not actually hide the
+glow, because `.hero-glow`'s `animation` writes `opacity` every frame, and a running CSS animation
+overrides a same-specificity non-animated declaration for the property it controls — the breathe
+cycle kept winning. Fixed with `.hero-glow.is-dismissed { animation: none; opacity: 0; }`, two classes
+of specificity beating `.hero-glow`'s one, declared after it in source order. A second instance of
+the same class of bug was caught before shipping, not after: the `prefers-reduced-motion` block's
+held frame uses `opacity: 0.55 !important`, which would have beaten `.is-dismissed`'s plain
+`opacity: 0` forever for reduced-motion visitors — fixed by adding
+`.hero-glow.is-dismissed { opacity: 0 !important; }` inside that same media block.
+
+**Why.** Both bugs are the same mistake in miniature: assuming a plain utility class can override
+something declared with more power (a running animation; an `!important` rule) just by existing.
+Neither can, and the fix in both cases was the same shape — give the dismissed state real cascade
+priority instead of adding a class and hoping.
+
+**Consequences.** `src/app/_components/LandingHero.tsx` no longer renders the glow directly.
+`ScrollCue.tsx` returns both elements from a `<>` fragment. `globals.css` gains `.is-dismissed` rules
+in two places (base and reduced-motion). Re-verified: full suite (188 tests, one transient flake on
+first run, clean on immediate re-run — not treated as a real regression since it did not reproduce),
+typecheck, lint, full e2e suite, and the served CSS decoded to confirm the new ellipse shape, height,
+and both `.is-dismissed` rules compiled correctly.
+
+---
+
+## D-024 — Drop the arrow, full-width glow only; suppress a Dark Reader hydration mismatch
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-023 on scroll cue composition
+
+**Context.** Two unrelated requests together: the scroll cue's glow should reach the full width
+(D-023 shipped it at 92%, visibly short of the edges), and the arrow above it should go — the glow
+alone is the cue now. Separately, a hydration-mismatch console error on the navbar logo, diffing
+`style={{color:"transparent"}}` against `style={{color:"transparent","--darkreader-inline-color":
+"transparent"}}` — the `--darkreader-inline-color` property is the Dark Reader browser extension's
+own signature, injected into inline styles before React hydrates.
+
+**Decision.** `ScrollCue.tsx` now renders only the glow div; the arrow SVG, its float animation, and
+`.scroll-arrow` are deleted, not left dead. The glow's gradient widens to `ellipse 100% 100% at 50%
+100%` with `transparent 80%` (was 92%/75%), reaching the container's edges. Both `<Image>` logos in
+`Navbar.tsx` get `suppressHydrationWarning` — the same treatment `layout.tsx` already gives the theme
+pre-paint script's class mismatch, since this is the identical category of problem: content injected
+by something outside the app, before React's first render, that can never match server-rendered HTML
+and isn't supposed to.
+
+**Why.** The Dark Reader mismatch is not a bug this project can fix in its own code — the extension
+runs before React hydrates, on every page load, for any visitor who has it installed, regardless of
+what Aguja renders. `suppressHydrationWarning` is the correct tool for exactly this: a known,
+expected, harmless mismatch, not React silently swallowing a real one — it does not suppress
+mismatches on children, only the element it's applied to.
+
+**Consequences.** `globals.css` loses `@keyframes scroll-arrow-float`, `.scroll-arrow`, and the now-
+empty reference to it in the reduced-motion block. `ScrollCue.tsx` returns a single element instead
+of a fragment with two. Re-verified: full suite (188 tests), typecheck, lint, full e2e suite, a
+source grep confirming zero remaining references to the deleted arrow, and the served CSS decoded to
+confirm the widened ellipse.
+
+---
+
+## D-025 — The radial gradient was the wrong tool; use a linear one
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-024 on the glow's gradient technique
+
+**Context.** D-024's widened ellipse (`100% 100%`) still didn't reach the edges — reported with a
+screenshot showing visibly dark corners. The `hero-glow` box is a full section width but only 128px
+tall. Computed the actual geometry rather than guessing again: from the gradient's origin
+(bottom-centre), the farthest corner sits at ~653px, but the box's own horizontal edge sits at
+~640px — 98% of that radius. Any colour stop low enough to look like a glow (75–80%) had already
+faded out well before reaching that 98% mark, regardless of the explicit size percentage used. This
+was the second attempt at the same wrong technique (D-023 at 92%, D-024 at 100%), not a tuning
+problem a third percentage would have fixed.
+
+**Decision.** Replace the radial gradient with `linear-gradient(to top, var(--color-violet-glow) 0%,
+transparent 100%)`.
+
+**Why.** A radial gradient's entire premise is distance-from-a-point, which is structurally opposed
+to "uniform across the full width" — on a box this wide and this short, the corner-seeking default
+sizing (and every percentage-based variant of it tried) always fades before reaching the horizontal
+edges, because those edges sit almost as far from the center as the corners do. A linear gradient
+in the vertical direction has no horizontal axis to vary across at all: every x-coordinate receives
+the identical top-to-bottom fade, by construction, not by a percentage tuned to look close enough.
+This is the second design bug found and fixed within this feature's glow specifically (after
+D-023's animation-override bug) — worth noting because both stemmed from the same root cause,
+reaching for CSS syntax that looked plausible without working out what it actually computes to on
+this exact box shape.
+
+**Consequences.** `globals.css`'s `.hero-glow` background declaration changes; the `hero-glow-breathe`
+opacity animation is untouched. Re-verified: full suite (188 tests), typecheck, lint, and the served
+CSS decoded to confirm the linear-gradient compiled as written.
+
+---
+
+## D-026 — The glow was still only as wide as the hero's own centred column
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-025 on the glow's horizontal containment
+
+**Context.** D-025's full-width linear gradient still didn't reach the page edges — reported again,
+this time with the actual cause named directly: `inset-x-0` makes an absolutely-positioned element
+span its *containing block's* edges, and the containing block here is the hero's own
+`max-w-7xl mx-auto` section, not the page. On any viewport wider than 1280px, that leaves a visible
+gap on both sides between the section's edge and the true page edge — exactly what the screenshot
+showed.
+
+**Decision.** Break the glow out of the section with the standard technique for exactly this
+situation: `left-1/2` (its left edge at the containing block's horizontal centre) + `w-screen`
+(full viewport width) + `-translate-x-1/2` (shifted left by half its own width). Net effect: the
+element's left edge lands at the viewport's own left edge, regardless of how narrow or offset its
+actual containing block is — because that containing block is itself horizontally centred in the
+viewport (`mx-auto`), the math cancels out exactly. `bottom-0` is untouched, so vertical placement
+at the hero's fold — the one thing that genuinely does need to stay relative to the section, not the
+whole page — is unaffected.
+
+**Why documented at this length for a four-class change**: `w-screen` (100vw) is a known source of
+spurious horizontal scrollbars, because `vw` units are defined against the initial containing block,
+which on many browsers includes the scrollbar gutter the visible viewport doesn't have. Given this
+exact project already shipped one real horizontal-overflow defect this session (`ToolDial`'s fixed
+`520px` width, found and left unscoped-out during the 004 headline work), a second glow-shaped one
+was worth ruling out rather than assuming away. Checked directly: `document.documentElement`'s
+`scrollWidth` vs `clientWidth` at six viewport widths (1920 down to 390px) measured *identical*
+overflow numbers with and without this change — confirmed by temporarily reverting to `inset-x-0`,
+re-running the same check, and diffing. The overflow that exists at 1024px and narrower is entirely
+the pre-existing `ToolDial` defect; this change contributes zero additional pixels of overflow at
+any tested width.
+
+**Consequences.** `ScrollCue.tsx`'s glow div's horizontal positioning classes change; `bottom-0`,
+`h-32`, and the `is-dismissed`/transition logic are untouched. Re-verified: full suite (188 tests),
+typecheck, lint, full e2e suite, the served HTML checked for the new classes, and the six-viewport
+overflow comparison described above — the only verification in this feature's history run twice,
+once against each version of the code, specifically to isolate cause from coincidence.
+
+---
+
+## D-027 — `100vw` was the actual bug; drop it for a normal-flow full-width sibling
+
+**Date**: 2026-07-30 · **Status**: Accepted · **Supersedes**: D-026 on technique (not on intent)
+
+**Context.** D-026's `left-1/2 w-screen -translate-x-1/2` breakout shipped, was checked for
+horizontal overflow across six viewport widths, measured zero additional overflow at every one — and
+still produced a real horizontal scrollbar, reported with a screenshot. The check that passed and the
+bug that shipped are both explained by the same fact: `vw` units are defined against the browser's
+initial containing block, which on many platforms includes the scrollbar gutter, while
+`document.documentElement.clientWidth` (what the check measured) excludes it by definition. Once a
+page is tall enough to need a vertical scrollbar — this one always is — `100vw` and the true available
+width part ways by exactly that gutter's size, on any browser using a classic (space-reserving)
+scrollbar. Playwright's headless Chromium did not reproduce it because it renders with an overlay
+scrollbar that reserves no layout space, so in that specific environment there was nothing to detect.
+
+**Decision.** Remove the `position:absolute` + `vw` breakout entirely. `ScrollCue` moves out of the
+hero `<section>` and becomes a normal-flow sibling of it inside `<main>` (`src/app/[locale]/page.tsx`),
+sized `w-full` — genuinely 100% of its parent's real content box, no viewport unit involved — and
+pulled up over the hero's bottom edge with `-mt-24` (a negative top margin exactly matching its own
+`h-24` height, so it visually overlaps the fold while claiming zero net space in the flow). Height
+also reduced from 128px to 96px per the same request that surfaced the scrollbar.
+
+**Why.** A block-level element at its default or `100%` width is, by CSS's own layout rules, always
+exactly as wide as its containing block's content box — which is always scrollbar-gutter-excluded,
+in every browser, without exception. This isn't a technique that happens to test well; it's
+structurally incapable of the class of bug `vw` caused, which is why no further overflow measurement
+was needed to trust it the way D-026's claim needed checking. The general lesson: a metric that
+passed everywhere it was checked can still be measuring the wrong thing — `clientWidth` vs
+`scrollWidth` is the right check for genuine content overflow, but it cannot see a unit that disagrees
+with `clientWidth` about what "the viewport" even means in the first place.
+
+**Consequences.** `LandingHero.tsx` no longer imports or renders `ScrollCue`. `page.tsx` renders it
+directly inside `<main>`, immediately after `<LandingHero />`. `ScrollCue.tsx`'s glow div drops
+`absolute`, `left-1/2`, `w-screen`, `-translate-x-1/2`, and `bottom-0` in favour of `w-full` and
+`-mt-24`; `is-dismissed`/transition logic is untouched. Re-verified: full suite (188 tests),
+typecheck, lint, full e2e suite, the served HTML checked for the new structure and classes, and the
+same six-viewport overflow comparison as D-026 — identical numbers, confirming the pre-existing
+`ToolDial` overflow is what remains and nothing new was added.
+
+---
+
+## D-028 — A separate, stronger glow token for the light theme
+
+**Date**: 2026-07-30 · **Status**: Accepted
+
+**Context.** The hero glow reused `--color-violet-glow` (light: `rgba(122, 63, 194, 0.35)`), the same
+token the needle's `thread-glow` and the scrollbar thumb use. Reported as too faint in the light
+theme specifically — not reported in dark, where the same token reads fine for all three uses.
+
+**Decision.** New token, `--color-hero-glow`, declared per theme alongside `--color-violet-glow`:
+dark keeps the identical value (`rgba(169, 112, 255, 0.45)`, unchanged), light raises the alpha to
+`0.6` (`rgba(122, 63, 194, 0.6)`). `.hero-glow`'s linear-gradient reads this new token instead of
+`--color-violet-glow`.
+
+**Why.** A translucent violet wash gains most of its "glow" character from luminance contrast against
+what's behind it, not from hue alone — the same alpha reads as a bright emission against near-black
+and as a flat tint against linen, because the two backgrounds start at opposite ends of the
+lightness scale. Raising `--color-violet-glow` itself would have fixed this but also intensified the
+needle's `thread-glow` and the scrollbar thumb's box-shadow in light mode, neither of which was
+reported as a problem — a shared token would have coupled an unrelated fix to a specific complaint.
+A second, purpose-scoped token keeps the fix precisely where it was asked for.
+
+**Consequences.** `globals.css` gains `--color-hero-glow` in both `:root` and `:root.light`.
+`.hero-glow`'s background declaration is the only consumer changed. Re-verified: full suite (188
+tests), typecheck, lint, full e2e suite, and the served CSS decoded to confirm both themes' values
+compiled correctly (`#a970ff73` dark, `#7a3fc299` light — alpha ≈0.45 and ≈0.60 respectively).
+
+---
+
+## D-029 — Replace the hero's Tool Dial with a tilted replica of the tool panel
+
+**Date**: 2026-08-01 · **Status**: Accepted
+
+**Context.** The landing hero's right-hand component was the Tool Dial: a circular
+component that cycled abstract previews of the four tools and auto-advanced until
+first interaction. The dial's fixed `w-[520px]` also caused the hero's only
+horizontal overflow at 360px (already documented in the FR-079 e2e test). Request
+was to show the tools section as it *actually* looks — the real `/tool` panel —
+instead of an abstract dial, slightly tilted, with the same violet glow the hero
+already carries at its bottom fold.
+
+**Decision.** `ToolDial` is replaced by `ToolPanelPreview` (`src/app/_components/`):
+a faithful, miniature, static replica of the real `ToolLayout` — the shared
+sidebar (Chunk Inspector active), the left input column (document, strategy,
+query), the chunked-document canvas, and the ranked results — rebuilt from the
+design tokens and the catalogue copy, not imported from the live tool (which is
+bound to the session store and the embedder worker). The panel is tilted `-2°` on
+desktop, anchored to the hero's bottom edge so it rests on the existing fold glow
+(`ScrollCue`, unchanged), and gains its own breathing radial violet glow at its
+bottom seam via a new `.tool-glow` class — an explicit, narrow extension of the
+Earned Glow Rule (D-022) to this one composition. It is static (the needle and
+thread remain the hero's only authored motion moment) and `aria-hidden`, since the
+navbar's Tools menu already owns navigation. `ToolDial.tsx` is deleted.
+
+**Why.** A debugger's landing should show the instrument, not an abstraction of it.
+The miniature panel proves the product's core claim — visible chunk boundaries and
+a ranked list — in one glance, using the same components' vocabulary (borders,
+`panel-inset-bg`, the violet thread bars) the tool itself uses. Rebuilding it from
+tokens keeps it vector-crisp at any DPI, theme-aware, and free of the fixed-width
+overflow that caused the dial's 360px defect (FR-079 is now fully clean, not just
+scoped around it). A screenshot would have been faster but pixelates on retina and
+breaks in light theme; importing the live UI would drag session/embedder state and
+a 23 MB model download into the landing.
+
+**Consequences.** `LandingHero.tsx` renders `ToolPanelPreview` instead of
+`ToolDial`. New `ToolPanelPreview.tsx` (server component) hardcodes a synthetic
+English refund-policy document and its fixed-size-500 chunk offsets, plus mock
+rankings, all rendered through existing catalogue keys; the sample document is
+English-only by the same rule as the evidence board's excerpt (D-013). `globals.css`
+gains `.tool-glow` and its `prefers-reduced-motion` override. `docs/decisions.md`
+grows this entry. DESIGN.md's "Tool Dial" component section is now stale and awaits
+a follow-up edit; `specs/003-bilingual-shell-docs/plan.md`'s component-tree sketch
+similarly lists `ToolDial`. Verified: full suite, typecheck, lint, full e2e suite,
+and the served HTML/CSS inspected.
+
+## D-030 — Rework the hero panel replica's composition
+
+**Date**: 2026-08-01 · **Status**: Accepted
+
+**Context.** D-029's `ToolPanelPreview` was bottom-anchored (`md:self-end md:mb-6`),
+which let the panel cover the ScrollCue fold glow (`.hero-glow`), and wore a
+bottom-seam radial glow of its own. The composition read as the panel sitting on
+two competing lights, with the fold's own glow hidden behind it.
+
+**Decision.** Recentre the replica vertically (drop `md:self-end`/`md:mb-6`) so the
+hero's `items-center` centres it and the fold glow is no longer obscured; widen it
+to 50% of the hero up to `max-w-[660px]`, with slightly wider grid columns
+(`md:grid-cols-[160px_minmax(0,1fr)_184px]`). Remove the `EnglishOnlyNotice` strip
+from the decorative mockup — the panel is illustration, and the English-only
+disclosure already lives where the real tool explains it. Change `.tool-glow` from
+a bottom-seam radial to a full all-around halo: the element is now
+`-inset-4 rounded-[28px] blur-2xl` with a solid translucent
+`--color-hero-glow` fill, so the same breathing keyframe wraps every edge instead
+of one seam. Layer the `BigNeedle` above the panel (`relative z-10 md:-mr-20`),
+overlapping its left edge, so the needle reads as stitching across the instrument.
+
+**Why.** The panel is the hero's centrepiece; centring it and giving it a
+surrounding glow makes it read as the instrument emitting light, while restoring
+the fold glow to visibility. The overlap with the needle strengthens the motif's
+story without new motion or dependencies.
+
+**Consequences.** `ToolPanelPreview.tsx` drops the `EnglishOnlyNotice` import and
+strip, widens to `max-w-[660px] md:w-[50%]`, and renders the halo
+(`-inset-4 rounded-[28px] blur-2xl`) inside the `md:-rotate-2` wrapper, behind the
+panel. `LandingHero.tsx`'s `BigNeedle` gains `relative z-10 md:-mr-20`.
+`globals.css`'s `.tool-glow` swaps the radial background for a solid
+`var(--color-hero-glow)` fill; its `prefers-reduced-motion` override is unchanged.
+`ScrollCue.tsx` and `.hero-glow` were intentionally left untouched. Verified: full
+suite, typecheck, lint, the e2e hero suite, and a dedicated e2e check of the halo
+geometry, rotation, and viewport overflow.
+
+## D-031 — Tilt the hero panel replica right, glow the border, let it float
+
+**Date**: 2026-08-01 · **Status**: Accepted
+
+**Context.** D-030 left the replica leaning left (`md:-rotate-2`) inside a full
+all-around halo (`-inset-4 ... blur-2xl`) that read as light behind the whole
+panel. The user wanted the lean mirrored to the right, the glow confined to the
+panel's rounded border rather than a halo floating above everything, and — if
+cheap — a gentle levitation so the instrument feels weightless.
+
+**Decision.** Flip the tilt to `md:rotate-2` (Tailwind v4's `rotate-*` utilities
+set the `rotate` property, so positive is clockwise). Replace the halo element
+with an edge ring: `inset-0 rounded-lg` matching the panel's radius, a faint
+`border-violet/30` line, and `.tool-glow` becomes transparent with
+`box-shadow: 0 0 18px 2px var(--color-hero-glow)` — the glow hugs the border
+instead of blooming behind the panel, keeping the same breathing keyframe. Add a
+`hero-float` keyframe (translateY 0↔-10px, 6s ease-in-out infinite) on the
+outermost wrapper so the replica drifts on every breakpoint while the tilt stays
+desktop-only; `rotate` and `transform` are independent properties on separate
+wrappers, so they compose without conflict.
+
+**Why.** A soft luminous ring reads as the instrument emitting light at its
+edges — the same violet glow language as the needle and fold — without the neon
+hardness of a constant-intensity border, which light theme's violet-on-linen
+would render as a flat tint (see the `--color-hero-glow` rationale). The float is
+a new authored motion moment that shares the existing `prefers-reduced-motion`
+guard.
+
+**Consequences.** `ToolPanelPreview.tsx`'s outer wrapper gains `hero-float`, the
+tilt wrapper flips to `md:rotate-2`, and the glow element becomes
+`inset-0 rounded-lg border border-violet/30`. `globals.css`'s `.tool-glow` drops
+its solid fill for `background: transparent` plus the edge box-shadow, gains the
+`hero-float` keyframe/class, and its `prefers-reduced-motion` override is
+extended to `.hero-float`. `docs/decisions.md` gains this entry. `ScrollCue.tsx`,
+`.hero-glow`, and the landing e2e suite are untouched — that spec asserts heading
+geometry only, never tilt or glow.
