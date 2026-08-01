@@ -1,15 +1,21 @@
-# Aguja
+<p align="center">
+  <img src="public/logo-aguja.png" alt="Aguja — debugger for RAG retrieval" width="560" />
+</p>
 
-**A debugger for retrieval systems.** Paste a document, see exactly how it gets split into
-chunks, run a query, and see which chunks come back — with their similarity scores and rank
-positions.
+# Aguja — a debugger for the retrieval half of RAG
 
-It answers one question: *why doesn't my retrieval find this passage?*
+**Paste a document, run a query, and see exactly why a passage does or doesn't come back.**
+Aguja shows you the chunks your RAG pipeline produces, the strategy that cut them, and the
+similarity score and rank of every chunk — no top-N cut, no black box.
 
-> **Status: shipped.** v1 (chunking + retrieval), v2 (the tool suite), and v3 (bilingual
-> interface + documentation) are all built and live on `main`.
+It answers one question: _why doesn't my retrieval find this passage?_
 
----
+## Quick path
+
+1. Paste plain text into the tool (`/tool`) — no sign-up, no API key.
+2. Watch your document get split into chunks, with the boundaries drawn over the text.
+3. Run a query and inspect the score and rank of every chunk.
+4. Compare strategies or phrasings until the miss becomes visible.
 
 ## The problem
 
@@ -64,7 +70,7 @@ pairwise strategy comparison, query-sensitivity analysis, a near-duplicate/contr
 over chunks, a shareable summary image, a bilingual interface, and in-app documentation.
 
 **Out:** file upload of any kind, semantic chunking, saved sessions, user accounts, comparing
-more than two strategies at once, persistence across reloads, a multilingual *analysis* (the
+more than two strategies at once, persistence across reloads, a multilingual _analysis_ (the
 interface is bilingual; the embedding model is not), and any tool requiring generative or
 second-model inference.
 
@@ -85,20 +91,13 @@ is free of framework imports — plain data in, plain data out. That is what mak
 strategies and similarity scoring cheap to test, and what keeps localization from ever touching
 the logic that decides a score.
 
-## How this was built
-
-Spec-driven, using [Spec Kit](https://github.com/github/spec-kit). The project constitution
-lives in [`.specify/memory/constitution.md`](.specify/memory/constitution.md) (currently 1.2.0)
-and holds two non-negotiable principles — tests before implementation, and every change
-traceable to a specification.
-
 ## Documentation
 
-| Document | What it covers |
-|---|---|
-| [v1 spec](specs/001-rag-chunking-debugger/spec.md) | Chunking and retrieval — user stories, requirements, success criteria |
-| [v2 spec](specs/002-rag-tool-suite/spec.md) | The tool suite — shared session, query sensitivity, confusable chunks |
-| [v3 spec](specs/003-bilingual-shell-docs/spec.md) | Bilingual interface, in-app documentation, navigation shell |
-| [Decisions](docs/decisions.md) | Why it is built this way, and what was rejected |
-| [Constitution](.specify/memory/constitution.md) | Engineering principles governing the project |
-| In-app docs (`/docs`) | What RAG is, what each tool measures, and how to troubleshoot a miss — for users, not contributors |
+| Document                                           | What it covers                                                                                     |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| [v1 spec](specs/001-rag-chunking-debugger/spec.md) | Chunking and retrieval — user stories, requirements, success criteria                              |
+| [v2 spec](specs/002-rag-tool-suite/spec.md)        | The tool suite — shared session, query sensitivity, confusable chunks                              |
+| [v3 spec](specs/003-bilingual-shell-docs/spec.md)  | Bilingual interface, in-app documentation, navigation shell                                        |
+| [Decisions](docs/decisions.md)                     | Why it is built this way, and what was rejected                                                    |
+| [Constitution](.specify/memory/constitution.md)    | Engineering principles governing the project                                                       |
+| In-app docs (`/docs`)                              | What RAG is, what each tool measures, and how to troubleshoot a miss — for users, not contributors |
