@@ -9,7 +9,10 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main className="flex flex-1 flex-col">
+      {/* The rich halftone-continent field is landing-only (D-021). Every
+          other route falls back to <body>'s small, uniform, cheap field
+          (globals.css). */}
+      <main className="dot-field-landing flex flex-1 flex-col">
         <LandingHero />
         <ProblemEvidenceBoard />
         <ProductWalkthrough />

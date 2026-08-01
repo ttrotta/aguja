@@ -73,13 +73,57 @@
   --radius-lg: 24px;
 }
 
+/* The dot field (DESIGN.md: "never a flat single-plane background").
+   Two tiers, not one (docs/decisions.md D-021, supersedes D-016 on this
+   point): the landing keeps the rich halftone-continent pattern as its own
+   identity; every other route gets a small, uniform, cheap field that
+   "no entorpezca" — doesn't compete with reading (docs, research) or working
+   (the tool). D-016 through D-020 made the rich pattern site-wide; this
+   undoes that specific choice while keeping everything those decisions
+   learned about the pattern itself.
+
+   `body` carries the default tier: a single repeating `radial-gradient`,
+   the same technique this feature started with before any SVG existed.
+   Uniform dots have no visible seam at any tile size, so this can be (and
+   is) a tiny tile — near-zero bytes, the opposite end of the cost spectrum
+   from the landing's ~19.75KB pattern. The hard stop at the same offset
+   (dot colour to `transparent` with no distance between them) draws a crisp
+   circle rather than blending, which is the one place `transparent` is safe
+   to use as a keyword here.
+
+   `.dot-field-landing` (applied to the landing's <main> only, in
+   `src/app/[locale]/page.tsx`) overrides `body`'s background with
+   `--dot-pattern` — the hand-authored, per-theme SVG carrying the seven
+   irregular landmasses. Everything D-017 through D-020 established about
+   that pattern (grid positions, coastline shape via angle-perturbed radius,
+   real size contrast, tile width close to viewport) is unchanged; it just
+   no longer reaches past the landing.
+
+   Opaque surfaces (panel-bg, panel-inset-bg, card-bg) drawn above either
+   tier continue to fully occlude it (FR-090) — this was already true and
+   remains true regardless of which tier is active underneath. */
 body {
-  background: var(--color-page-bg);
+  background-color: var(--color-page-bg);
+  background-image: radial-gradient(circle, var(--color-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-repeat: repeat;
   color: var(--color-text);
   font-family: var(--font-jost), system-ui, sans-serif;
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
+}
+
+.dot-field-landing {
+  /* Opaque on purpose: <main> sits in front of <body> in the paint order,
+     so without its own background-color, the transparent gaps between this
+     pattern's dots (most of the tile — see D-019/D-020's empty-space
+     numbers) would let body's own small-dot gradient show through behind
+     it, mixing the two tiers instead of replacing one with the other. */
+  background-color: var(--color-page-bg);
+  background-image: var(--dot-pattern);
+  background-size: 1720px 500px;
+  background-repeat: repeat;
 }
 
 /* The needle "stitches in" — an authored motion moment tied to selection,
