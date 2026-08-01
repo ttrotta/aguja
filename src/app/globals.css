@@ -183,27 +183,83 @@ body {
   transform-origin: 50% 85%;
 }
 
-@keyframes scroll-cue-dot {
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  70% {
-    transform: translateY(12px);
-    opacity: 0;
-  }
-  71% {
-    transform: translateY(0);
-    opacity: 0;
-  }
+/* Ambient glow at the hero's fold — an extension of the Earned Glow Rule,
+   not a use it already covered (see DESIGN.md, D-022). Breathes rather than
+   holds a fixed intensity, so it reads as alive without competing with the
+   thread-glow that marks the needle itself.
+
+   A linear gradient, not radial: a radial gradient is fundamentally
+   "distance from a point," which fights a "full width" requirement rather
+   than satisfying it — on a box this wide and this short (a full section
+   width, only 128px tall), the horizontal edge sits at ~98% of the
+   distance to the farthest corner, so the colour has already faded out
+   before reaching it, no matter what percentage the stop uses. A vertical
+   linear gradient has no horizontal axis to fade across at all — every x
+   position gets the identical vertical fade, by definition. */
+@keyframes hero-glow-breathe {
+  0%,
   100% {
-    transform: translateY(0);
-    opacity: 1;
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
   }
 }
 
-.scroll-cue-dot {
-  animation: scroll-cue-dot 1.6s ease-in-out infinite;
+/* --color-hero-glow, not --color-violet-glow: a translucent violet wash
+   reads as a glow against near-black (dark theme, same value as
+   --color-violet-glow) but as a flat tint against linen (light theme) —
+   violet-over-dark and violet-over-light aren't equally visible at the same
+   alpha, because a glow's legibility depends on luminance contrast, not
+   just hue. Kept as its own token rather than raising --color-violet-glow
+   itself, so the needle's thread-glow and the scrollbar thumb (D-022),
+   which read fine as-is, are untouched by this. */
+.hero-glow {
+  background: linear-gradient(to top, var(--color-hero-glow) 0%, transparent 100%);
+  animation: hero-glow-breathe 4s ease-in-out infinite;
+}
+
+/* The same breathing violet wash, now drawn as an edge ring around the hero's
+   tool-panel replica so the instrument reads as emitting light at its border
+   rather than through a halo floating behind everything (D-031). The fill is
+   transparent: the `border-violet/30` utility on the element draws the crisp
+   ring, and this box-shadow paints the soft glow just outside it, hugging the
+   panel's rounded border. Same token, same keyframe — one glow language. */
+.tool-glow {
+  background: transparent;
+  box-shadow: 0 0 18px 2px var(--color-hero-glow);
+  animation: hero-glow-breathe 4s ease-in-out infinite;
+}
+
+/* A slow vertical drift that makes the tool-panel replica read as weightless,
+   floating above the hero rather than pinned to it (D-031). The `rotate` set by
+   the `md:rotate-2` utility is an independent CSS property and lives on the
+   tilt wrapper; this `transform` lives on the outermost wrapper, so the two
+   compose without conflict — the panel both leans and drifts. */
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.hero-float {
+  animation: hero-float 6s ease-in-out infinite;
+}
+
+/* Dismissing the glow needs more than opacity-0 on the element: the
+   breathe animation writes `opacity` every frame and would keep winning
+   over a plain utility class at equal specificity. This rule shares that
+   specificity but is declared after `.hero-glow` in source order, so it
+   wins the cascade and actually stops the animation — the element then
+   transitions its now-static opacity to 0 via the Tailwind
+   `transition-opacity` utility already on it in ScrollCue.tsx. */
+.hero-glow.is-dismissed {
+  animation: none;
+  opacity: 0;
 }
 
 /* Bounded preview panes (the document preview, the results list) scroll on
@@ -218,10 +274,59 @@ body {
   display: none;
 }
 
+/* The scrollbar as the thread itself (D-022) — site-wide, since this is
+   chrome like the navbar, not landing-only atmosphere. Firefox only exposes
+   colour (scrollbar-color), no shape or glow; WebKit/Blink/Safari get the
+   full treatment: a violet pill thumb with the same glow the needle wears.
+   `background-clip: padding-box` is what keeps the border from being
+   painted over by the fill, so the page-bg ring around the thumb actually
+   shows. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-violet) var(--color-page-bg);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-page-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-violet);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  box-shadow: 0 0 6px var(--color-violet-glow);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-violet-deep);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .thread-drift,
   .needle-sway,
-  .scroll-cue-dot {
+  .hero-float {
     animation: none !important;
+  }
+
+  .hero-glow {
+    animation: none !important;
+    opacity: 0.55;
+  }
+
+  .tool-glow {
+    animation: none !important;
+    opacity: 0.55;
+  }
+
+  /* Without this, the static reduced-motion frame above would win forever
+     over .is-dismissed's plain (non-important) opacity: 0 — dismissal has
+     to be able to override the held frame too, not just the animation. */
+  .hero-glow.is-dismissed {
+    opacity: 0 !important;
   }
 }

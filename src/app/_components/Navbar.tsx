@@ -13,12 +13,18 @@ export function Navbar() {
     <header className="sticky top-0 z-10 border-b border-text/10 bg-page-bg/80 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-2 text-text overflow-visible">
+          {/* Dark-mode browser extensions (Dark Reader, etc.) inject a
+              --darkreader-inline-color custom property into inline styles
+              before React hydrates, which never matches what the server
+              rendered. Same category of expected, one-time mismatch as the
+              theme pre-paint script in layout.tsx — not an app bug. */}
           <Image
             src="/logo-dark.webp"
             alt="Aguja"
             width={240}
             height={68}
             priority
+            suppressHydrationWarning
             className="theme-logo-dark h-9 w-auto scale-[1.5] origin-left object-contain -ml-6"
           />
           <Image
@@ -27,7 +33,8 @@ export function Navbar() {
             width={240}
             height={68}
             priority
-            className="theme-logo-light h-9 w-auto scale-[1.15] origin-left object-contain -ml-6"
+            suppressHydrationWarning
+            className="theme-logo-light h-9 w-auto scale-[1.5] origin-left object-contain -ml-6"
           />
         </Link>
         <nav className="flex items-center gap-1">
