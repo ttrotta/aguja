@@ -30,7 +30,7 @@ export function ResearchList({ papers, loadFailed, locale }: ResearchListProps) 
       {papers.map((paper) => (
         <li
           key={paper.id}
-          className="flex flex-col gap-2 border-t-2 border-violet bg-panel-inset-bg p-4"
+          className="flex flex-col gap-2 border-t-2 border-x border-b border-t-violet border-x-text/10 border-b-text/10 bg-card-bg p-4"
         >
           <p className="text-xs text-text-muted">
             {t("source")} · {dateFormatter.format(new Date(paper.publishedAt))}

@@ -37,14 +37,14 @@ function Block({ block }: { block: DocBlock }) {
           <span>{block.text}</span>
         </p>
       ) : (
-        <p className="border-t-2 border-violet bg-panel-inset-bg p-3 text-[0.9375rem] leading-relaxed text-text/85">
+        <p className="border-t-2 border-x border-b border-t-violet border-x-text/10 border-b-text/10 bg-card-bg p-3 text-[0.9375rem] leading-relaxed text-text/85">
           {block.text}
         </p>
       );
 
     case "example":
       return (
-        <div className="border-t-2 border-violet bg-panel-inset-bg p-4">
+        <div className="border-t-2 border-x border-b border-t-violet border-x-text/10 border-b-text/10 bg-card-bg p-4">
           <p className="mb-3 text-sm text-text-muted">{block.caption}</p>
           <dl className="flex flex-col gap-2">
             {block.rows.map((row) => (
